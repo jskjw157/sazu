@@ -1,0 +1,1342 @@
+{
+  "title": "상용 사주 원천 조사: 제한된 실행 검증 기록",
+  "audit_date": "2026-10-20",
+  "status": "research_evidence_not_production_approval",
+  "scope_notes": [
+    "Synthetic or public reference dates only; no real user birth profile submitted.",
+    "No authenticated official API or commercial API was called.",
+    "This artifact does not establish predictive validity of fortune-telling.",
+    "Engine and source versions are pinned; future upgrades require new comparison."
+  ],
+  "solar_term_probe": {
+    "scope": "Research probe only: 48 events in 1993 and 2026; no saju-pillar validation; no authenticated vendor/API call.",
+    "limitations": [
+      "KASI source reports rounded minutes, not exact seconds.",
+      "Counts and rounded-minute matches do not prove all years or all policy boundaries correct.",
+      "KASI original physical ephemeris lineage is not established; numerical agreement alone is not proof of independent validation.",
+      "Astronomy Engine default UTC approximations and Delta-T model differ from Skyfield time-scale handling.",
+      "Future UTC/leap-second assumptions can change; preserve time-scale versions and original source precision."
+    ],
+    "versions": {
+      "skyfield": "1.55",
+      "astronomy-engine": "2.1.19",
+      "numpy": "2.5.4",
+      "jplephem": "2.24",
+      "sgp4": "2.27"
+    },
+    "source": {
+      "kasi_url": "https://astro.kasi.re.kr/kor/almanac/solarTerms/download",
+      "kasi_sha256": "508761248c7d18eb1ca1bcb1fcace2ba29f3f511d085321ae1e633c74d8e9e34",
+      "row_count": 4344,
+      "years": [
+        1920,
+        2100
+      ],
+      "rows_per_year": [
+        24
+      ],
+      "duplicate_year_term_keys": 0,
+      "hour_24_records": [
+        {
+          "term": 24,
+          "year": 1950,
+          "month": 1,
+          "day": 20,
+          "hour": 24,
+          "minute": 0
+        },
+        {
+          "term": 2,
+          "year": 2030,
+          "month": 2,
+          "day": 18,
+          "hour": 24,
+          "minute": 0
+        },
+        {
+          "term": 24,
+          "year": 2053,
+          "month": 1,
+          "day": 19,
+          "hour": 24,
+          "minute": 0
+        }
+      ],
+      "kasi_source_clock": "fixed UTC+09:00, irrespective of historical Korea offset or DST",
+      "kasi_header_date": "2026-09-01",
+      "jpl_url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp",
+      "jpl_sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2",
+      "skyfield_timescale": "builtin data in skyfield 1.55"
+    },
+    "summary": {
+      "skyfield": {
+        "rounded_minute_matches": 48,
+        "cases": 48,
+        "max_abs_difference_from_display_seconds": 29.655,
+        "mismatches": []
+      },
+      "astronomy_engine_default": {
+        "rounded_minute_matches": 42,
+        "cases": 48,
+        "max_abs_difference_from_display_seconds": 59.456,
+        "mismatches": [
+          {
+            "year": 2026,
+            "term": "망종",
+            "difference_seconds": 59.456
+          },
+          {
+            "year": 2026,
+            "term": "백로",
+            "difference_seconds": 44.297
+          },
+          {
+            "year": 2026,
+            "term": "추분",
+            "difference_seconds": 38.617
+          },
+          {
+            "year": 2026,
+            "term": "한로",
+            "difference_seconds": 58.056
+          },
+          {
+            "year": 2026,
+            "term": "입동",
+            "difference_seconds": 33.363
+          },
+          {
+            "year": 2026,
+            "term": "소설",
+            "difference_seconds": 34.115
+          }
+        ]
+      },
+      "engine_comparison": {
+        "max_default_abs_difference_seconds": 40.559,
+        "max_same_tt_abs_difference_seconds": 46.899
+      }
+    },
+    "comparisons": [
+      {
+        "year": 1993,
+        "term": 23,
+        "name": "소한",
+        "skyfield_kst": "1993-01-05T16:56:31.153578+09:00",
+        "astronomy_engine_default_kst": "1993-01-05T16:56:35.135074+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-01-05T16:56:35.063434+09:00",
+        "skyfield_minus_kasi_display_seconds": -28.846,
+        "astronomy_engine_default_minus_kasi_display_seconds": -24.865,
+        "astronomy_engine_default_minus_skyfield_seconds": 3.981,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 3.91,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 24,
+        "name": "대한",
+        "skyfield_kst": "1993-01-20T10:22:48.537432+09:00",
+        "astronomy_engine_default_kst": "1993-01-20T10:22:55.650133+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-01-20T10:22:55.611704+09:00",
+        "skyfield_minus_kasi_display_seconds": -11.463,
+        "astronomy_engine_default_minus_kasi_display_seconds": -4.35,
+        "astronomy_engine_default_minus_skyfield_seconds": 7.113,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 7.074,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 1,
+        "name": "입춘",
+        "skyfield_kst": "1993-02-04T04:37:08.988689+09:00",
+        "astronomy_engine_default_kst": "1993-02-04T04:37:21.815656+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-02-04T04:37:21.810587+09:00",
+        "skyfield_minus_kasi_display_seconds": 8.989,
+        "astronomy_engine_default_minus_kasi_display_seconds": 21.816,
+        "astronomy_engine_default_minus_skyfield_seconds": 12.827,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 12.822,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 2,
+        "name": "우수",
+        "skyfield_kst": "1993-02-19T00:35:09.342681+09:00",
+        "astronomy_engine_default_kst": "1993-02-19T00:35:19.559536+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-02-19T00:35:19.588008+09:00",
+        "skyfield_minus_kasi_display_seconds": 9.343,
+        "astronomy_engine_default_minus_kasi_display_seconds": 19.56,
+        "astronomy_engine_default_minus_skyfield_seconds": 10.217,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 10.245,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 3,
+        "name": "경칩",
+        "skyfield_kst": "1993-03-05T22:42:31.503818+09:00",
+        "astronomy_engine_default_kst": "1993-03-05T22:42:51.787670+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-03-05T22:42:51.849956+09:00",
+        "skyfield_minus_kasi_display_seconds": -28.496,
+        "astronomy_engine_default_minus_kasi_display_seconds": -8.212,
+        "astronomy_engine_default_minus_skyfield_seconds": 20.284,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 20.346,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 4,
+        "name": "춘분",
+        "skyfield_kst": "1993-03-20T23:40:37.748557+09:00",
+        "astronomy_engine_default_kst": "1993-03-20T23:40:47.365316+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-03-20T23:40:47.461681+09:00",
+        "skyfield_minus_kasi_display_seconds": -22.251,
+        "astronomy_engine_default_minus_kasi_display_seconds": -12.635,
+        "astronomy_engine_default_minus_skyfield_seconds": 9.617,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 9.713,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 5,
+        "name": "청명",
+        "skyfield_kst": "1993-04-05T03:37:09.702479+09:00",
+        "astronomy_engine_default_kst": "1993-04-05T03:37:27.317756+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-04-05T03:37:27.448550+09:00",
+        "skyfield_minus_kasi_display_seconds": 9.702,
+        "astronomy_engine_default_minus_kasi_display_seconds": 27.318,
+        "astronomy_engine_default_minus_skyfield_seconds": 17.615,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 17.746,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 6,
+        "name": "곡우",
+        "skyfield_kst": "1993-04-20T10:48:59.946531+09:00",
+        "astronomy_engine_default_kst": "1993-04-20T10:49:04.694516+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-04-20T10:49:04.860083+09:00",
+        "skyfield_minus_kasi_display_seconds": -0.053,
+        "astronomy_engine_default_minus_kasi_display_seconds": 4.695,
+        "astronomy_engine_default_minus_skyfield_seconds": 4.748,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 4.914,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 7,
+        "name": "입하",
+        "skyfield_kst": "1993-05-05T21:01:42.242926+09:00",
+        "astronomy_engine_default_kst": "1993-05-05T21:01:56.705687+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-05-05T21:01:56.906334+09:00",
+        "skyfield_minus_kasi_display_seconds": -17.757,
+        "astronomy_engine_default_minus_kasi_display_seconds": -3.294,
+        "astronomy_engine_default_minus_skyfield_seconds": 14.463,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 14.663,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 8,
+        "name": "소만",
+        "skyfield_kst": "1993-05-21T10:01:43.201829+09:00",
+        "astronomy_engine_default_kst": "1993-05-21T10:01:48.156607+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-05-21T10:01:48.392668+09:00",
+        "skyfield_minus_kasi_display_seconds": -16.798,
+        "astronomy_engine_default_minus_kasi_display_seconds": -11.843,
+        "astronomy_engine_default_minus_skyfield_seconds": 4.955,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 5.191,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 9,
+        "name": "망종",
+        "skyfield_kst": "1993-06-06T01:15:13.435897+09:00",
+        "astronomy_engine_default_kst": "1993-06-06T01:15:28.959636+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-06-06T01:15:29.231305+09:00",
+        "skyfield_minus_kasi_display_seconds": 13.436,
+        "astronomy_engine_default_minus_kasi_display_seconds": 28.96,
+        "astronomy_engine_default_minus_skyfield_seconds": 15.524,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 15.795,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 10,
+        "name": "하지",
+        "skyfield_kst": "1993-06-21T17:59:44.096634+09:00",
+        "astronomy_engine_default_kst": "1993-06-21T17:59:48.965148+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-06-21T17:59:49.272627+09:00",
+        "skyfield_minus_kasi_display_seconds": -15.903,
+        "astronomy_engine_default_minus_kasi_display_seconds": -11.035,
+        "astronomy_engine_default_minus_skyfield_seconds": 4.869,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 5.176,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 11,
+        "name": "소서",
+        "skyfield_kst": "1993-07-07T11:32:01.637169+09:00",
+        "astronomy_engine_default_kst": "1993-07-07T11:32:11.207613+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-07-07T11:32:10.550981+09:00",
+        "skyfield_minus_kasi_display_seconds": 1.637,
+        "astronomy_engine_default_minus_kasi_display_seconds": 11.208,
+        "astronomy_engine_default_minus_skyfield_seconds": 9.57,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 8.914,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 12,
+        "name": "대서",
+        "skyfield_kst": "1993-07-23T04:50:49.252511+09:00",
+        "astronomy_engine_default_kst": "1993-07-23T04:50:54.608580+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-07-23T04:50:53.987870+09:00",
+        "skyfield_minus_kasi_display_seconds": -10.747,
+        "astronomy_engine_default_minus_kasi_display_seconds": -5.391,
+        "astronomy_engine_default_minus_skyfield_seconds": 5.356,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 4.735,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 13,
+        "name": "입추",
+        "skyfield_kst": "1993-08-07T21:17:57.595345+09:00",
+        "astronomy_engine_default_kst": "1993-08-07T21:18:00.703659+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-08-07T21:18:00.118767+09:00",
+        "skyfield_minus_kasi_display_seconds": -2.405,
+        "astronomy_engine_default_minus_kasi_display_seconds": 0.704,
+        "astronomy_engine_default_minus_skyfield_seconds": 3.108,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 2.523,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 14,
+        "name": "처서",
+        "skyfield_kst": "1993-08-23T11:50:16.696649+09:00",
+        "astronomy_engine_default_kst": "1993-08-23T11:50:19.059731+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-08-23T11:50:18.510519+09:00",
+        "skyfield_minus_kasi_display_seconds": 16.697,
+        "astronomy_engine_default_minus_kasi_display_seconds": 19.06,
+        "astronomy_engine_default_minus_skyfield_seconds": 2.363,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 1.814,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 15,
+        "name": "백로",
+        "skyfield_kst": "1993-09-08T00:07:46.961199+09:00",
+        "astronomy_engine_default_kst": "1993-09-08T00:07:43.714661+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-09-08T00:07:43.200930+09:00",
+        "skyfield_minus_kasi_display_seconds": -13.039,
+        "astronomy_engine_default_minus_kasi_display_seconds": -16.285,
+        "astronomy_engine_default_minus_skyfield_seconds": -3.247,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": -3.76,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 16,
+        "name": "추분",
+        "skyfield_kst": "1993-09-23T09:22:27.709591+09:00",
+        "astronomy_engine_default_kst": "1993-09-23T09:22:28.245365+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-09-23T09:22:27.766842+09:00",
+        "skyfield_minus_kasi_display_seconds": 27.71,
+        "astronomy_engine_default_minus_kasi_display_seconds": 28.245,
+        "astronomy_engine_default_minus_skyfield_seconds": 0.536,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 0.057,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 17,
+        "name": "한로",
+        "skyfield_kst": "1993-10-08T15:40:01.511237+09:00",
+        "astronomy_engine_default_kst": "1993-10-08T15:39:56.822727+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-10-08T15:39:56.379139+09:00",
+        "skyfield_minus_kasi_display_seconds": 1.511,
+        "astronomy_engine_default_minus_kasi_display_seconds": -3.177,
+        "astronomy_engine_default_minus_skyfield_seconds": -4.689,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": -5.132,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 18,
+        "name": "상강",
+        "skyfield_kst": "1993-10-23T18:37:07.246643+09:00",
+        "astronomy_engine_default_kst": "1993-10-23T18:37:08.268116+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-10-23T18:37:07.859152+09:00",
+        "skyfield_minus_kasi_display_seconds": 7.247,
+        "astronomy_engine_default_minus_kasi_display_seconds": 8.268,
+        "astronomy_engine_default_minus_skyfield_seconds": 1.021,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 0.613,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 19,
+        "name": "입동",
+        "skyfield_kst": "1993-11-07T18:45:32.729236+09:00",
+        "astronomy_engine_default_kst": "1993-11-07T18:45:33.965281+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-11-07T18:45:33.590667+09:00",
+        "skyfield_minus_kasi_display_seconds": -27.271,
+        "astronomy_engine_default_minus_kasi_display_seconds": -26.035,
+        "astronomy_engine_default_minus_skyfield_seconds": 1.236,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 0.861,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 20,
+        "name": "소설",
+        "skyfield_kst": "1993-11-22T16:06:49.909031+09:00",
+        "astronomy_engine_default_kst": "1993-11-22T16:06:57.481476+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-11-22T16:06:57.140978+09:00",
+        "skyfield_minus_kasi_display_seconds": -10.091,
+        "astronomy_engine_default_minus_kasi_display_seconds": -2.519,
+        "astronomy_engine_default_minus_skyfield_seconds": 7.572,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 7.232,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 21,
+        "name": "대설",
+        "skyfield_kst": "1993-12-07T11:33:48.585653+09:00",
+        "astronomy_engine_default_kst": "1993-12-07T11:33:55.934613+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-12-07T11:33:55.628021+09:00",
+        "skyfield_minus_kasi_display_seconds": -11.414,
+        "astronomy_engine_default_minus_kasi_display_seconds": -4.065,
+        "astronomy_engine_default_minus_skyfield_seconds": 7.349,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 7.042,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 1993,
+        "term": 22,
+        "name": "동지",
+        "skyfield_kst": "1993-12-22T05:25:47.649296+09:00",
+        "astronomy_engine_default_kst": "1993-12-22T05:26:01.539550+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "1993-12-22T05:26:01.266724+09:00",
+        "skyfield_minus_kasi_display_seconds": -12.351,
+        "astronomy_engine_default_minus_kasi_display_seconds": 1.54,
+        "astronomy_engine_default_minus_skyfield_seconds": 13.89,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 13.617,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 23,
+        "name": "소한",
+        "skyfield_kst": "2026-01-05T17:23:09.453968+09:00",
+        "astronomy_engine_default_kst": "2026-01-05T17:23:03.114477+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-01-05T17:23:08.989195+09:00",
+        "skyfield_minus_kasi_display_seconds": 9.454,
+        "astronomy_engine_default_minus_kasi_display_seconds": 3.114,
+        "astronomy_engine_default_minus_skyfield_seconds": -6.339,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": -0.465,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 24,
+        "name": "대한",
+        "skyfield_kst": "2026-01-20T10:44:56.069545+09:00",
+        "astronomy_engine_default_kst": "2026-01-20T10:44:42.359876+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-01-20T10:44:48.259328+09:00",
+        "skyfield_minus_kasi_display_seconds": -3.93,
+        "astronomy_engine_default_minus_kasi_display_seconds": -17.64,
+        "astronomy_engine_default_minus_skyfield_seconds": -13.71,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": -7.81,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 1,
+        "name": "입춘",
+        "skyfield_kst": "2026-02-04T05:02:07.930494+09:00",
+        "astronomy_engine_default_kst": "2026-02-04T05:01:54.541442+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-02-04T05:02:00.465679+09:00",
+        "skyfield_minus_kasi_display_seconds": 7.93,
+        "astronomy_engine_default_minus_kasi_display_seconds": -5.459,
+        "astronomy_engine_default_minus_skyfield_seconds": -13.389,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": -7.465,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 2,
+        "name": "우수",
+        "skyfield_kst": "2026-02-19T00:51:55.507799+09:00",
+        "astronomy_engine_default_kst": "2026-02-19T00:51:32.389210+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-02-19T00:51:38.338348+09:00",
+        "skyfield_minus_kasi_display_seconds": -4.492,
+        "astronomy_engine_default_minus_kasi_display_seconds": -27.611,
+        "astronomy_engine_default_minus_skyfield_seconds": -23.119,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": -17.169,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 3,
+        "name": "경칩",
+        "skyfield_kst": "2026-03-05T22:58:59.101263+09:00",
+        "astronomy_engine_default_kst": "2026-03-05T22:58:43.971784+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-03-05T22:58:49.946012+09:00",
+        "skyfield_minus_kasi_display_seconds": -0.899,
+        "astronomy_engine_default_minus_kasi_display_seconds": -16.028,
+        "astronomy_engine_default_minus_skyfield_seconds": -15.129,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": -9.155,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 4,
+        "name": "춘분",
+        "skyfield_kst": "2026-03-20T23:45:57.447030+09:00",
+        "astronomy_engine_default_kst": "2026-03-20T23:45:36.044210+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-03-20T23:45:42.043734+09:00",
+        "skyfield_minus_kasi_display_seconds": -2.553,
+        "astronomy_engine_default_minus_kasi_display_seconds": -23.956,
+        "astronomy_engine_default_minus_skyfield_seconds": -21.403,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": -15.403,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 5,
+        "name": "청명",
+        "skyfield_kst": "2026-04-05T03:39:59.185311+09:00",
+        "astronomy_engine_default_kst": "2026-04-05T03:39:59.161925+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-04-05T03:40:05.186968+09:00",
+        "skyfield_minus_kasi_display_seconds": -0.815,
+        "astronomy_engine_default_minus_kasi_display_seconds": -0.838,
+        "astronomy_engine_default_minus_skyfield_seconds": -0.023,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 6.002,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 6,
+        "name": "곡우",
+        "skyfield_kst": "2026-04-20T10:39:06.493248+09:00",
+        "astronomy_engine_default_kst": "2026-04-20T10:39:09.897943+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-04-20T10:39:15.948759+09:00",
+        "skyfield_minus_kasi_display_seconds": 6.493,
+        "astronomy_engine_default_minus_kasi_display_seconds": 9.898,
+        "astronomy_engine_default_minus_skyfield_seconds": 3.405,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 9.456,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 7,
+        "name": "입하",
+        "skyfield_kst": "2026-05-05T20:48:43.665159+09:00",
+        "astronomy_engine_default_kst": "2026-05-05T20:49:09.475611+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-05-05T20:49:15.552413+09:00",
+        "skyfield_minus_kasi_display_seconds": -16.335,
+        "astronomy_engine_default_minus_kasi_display_seconds": 9.476,
+        "astronomy_engine_default_minus_skyfield_seconds": 25.81,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 31.887,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 8,
+        "name": "소만",
+        "skyfield_kst": "2026-05-21T09:36:44.324006+09:00",
+        "astronomy_engine_default_kst": "2026-05-21T09:37:16.959075+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-05-21T09:37:23.062118+09:00",
+        "skyfield_minus_kasi_display_seconds": -15.676,
+        "astronomy_engine_default_minus_kasi_display_seconds": 16.959,
+        "astronomy_engine_default_minus_skyfield_seconds": 32.635,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 38.738,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 9,
+        "name": "망종",
+        "skyfield_kst": "2026-06-06T00:48:21.890048+09:00",
+        "astronomy_engine_default_kst": "2026-06-06T00:48:59.456490+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-06-06T00:49:05.585928+09:00",
+        "skyfield_minus_kasi_display_seconds": 21.89,
+        "astronomy_engine_default_minus_kasi_display_seconds": 59.456,
+        "astronomy_engine_default_minus_skyfield_seconds": 37.566,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 43.696,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": false,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": false
+      },
+      {
+        "year": 2026,
+        "term": 10,
+        "name": "하지",
+        "skyfield_kst": "2026-06-21T17:24:30.345301+09:00",
+        "astronomy_engine_default_kst": "2026-06-21T17:25:00.316749+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-06-21T17:25:06.472725+09:00",
+        "skyfield_minus_kasi_display_seconds": -29.655,
+        "astronomy_engine_default_minus_kasi_display_seconds": 0.317,
+        "astronomy_engine_default_minus_skyfield_seconds": 29.971,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 36.127,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 11,
+        "name": "소서",
+        "skyfield_kst": "2026-07-07T10:56:57.368630+09:00",
+        "astronomy_engine_default_kst": "2026-07-07T10:57:22.385783+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-07-07T10:57:28.568340+09:00",
+        "skyfield_minus_kasi_display_seconds": -2.631,
+        "astronomy_engine_default_minus_kasi_display_seconds": 22.386,
+        "astronomy_engine_default_minus_skyfield_seconds": 25.017,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 31.2,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 12,
+        "name": "대서",
+        "skyfield_kst": "2026-07-23T04:13:05.222618+09:00",
+        "astronomy_engine_default_kst": "2026-07-23T04:13:18.217427+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-07-23T04:13:24.426617+09:00",
+        "skyfield_minus_kasi_display_seconds": 5.223,
+        "astronomy_engine_default_minus_kasi_display_seconds": 18.217,
+        "astronomy_engine_default_minus_skyfield_seconds": 12.995,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 19.204,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 13,
+        "name": "입추",
+        "skyfield_kst": "2026-08-07T20:42:44.537516+09:00",
+        "astronomy_engine_default_kst": "2026-08-07T20:42:56.663991+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-08-07T20:43:02.899758+09:00",
+        "skyfield_minus_kasi_display_seconds": -15.462,
+        "astronomy_engine_default_minus_kasi_display_seconds": -3.336,
+        "astronomy_engine_default_minus_skyfield_seconds": 12.126,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 18.362,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 14,
+        "name": "처서",
+        "skyfield_kst": "2026-08-23T11:18:48.428669+09:00",
+        "astronomy_engine_default_kst": "2026-08-23T11:18:58.412605+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-08-23T11:19:04.674849+09:00",
+        "skyfield_minus_kasi_display_seconds": -11.571,
+        "astronomy_engine_default_minus_kasi_display_seconds": -1.587,
+        "astronomy_engine_default_minus_skyfield_seconds": 9.984,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 16.246,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 15,
+        "name": "백로",
+        "skyfield_kst": "2026-09-07T23:41:17.240463+09:00",
+        "astronomy_engine_default_kst": "2026-09-07T23:41:44.296764+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-09-07T23:41:50.585324+09:00",
+        "skyfield_minus_kasi_display_seconds": 17.24,
+        "astronomy_engine_default_minus_kasi_display_seconds": 44.297,
+        "astronomy_engine_default_minus_skyfield_seconds": 27.056,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 33.345,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": false,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": false
+      },
+      {
+        "year": 2026,
+        "term": 16,
+        "name": "추분",
+        "skyfield_kst": "2026-09-23T09:05:13.166612+09:00",
+        "astronomy_engine_default_kst": "2026-09-23T09:05:38.617002+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-09-23T09:05:44.931718+09:00",
+        "skyfield_minus_kasi_display_seconds": 13.167,
+        "astronomy_engine_default_minus_kasi_display_seconds": 38.617,
+        "astronomy_engine_default_minus_skyfield_seconds": 25.45,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 31.765,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": false,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": false
+      },
+      {
+        "year": 2026,
+        "term": 17,
+        "name": "한로",
+        "skyfield_kst": "2026-10-08T15:29:17.497221+09:00",
+        "astronomy_engine_default_kst": "2026-10-08T15:29:58.055935+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-10-08T15:30:04.396584+09:00",
+        "skyfield_minus_kasi_display_seconds": 17.497,
+        "astronomy_engine_default_minus_kasi_display_seconds": 58.056,
+        "astronomy_engine_default_minus_skyfield_seconds": 40.559,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 46.899,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": false,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": false
+      },
+      {
+        "year": 2026,
+        "term": 18,
+        "name": "상강",
+        "skyfield_kst": "2026-10-23T18:37:56.296780+09:00",
+        "astronomy_engine_default_kst": "2026-10-23T18:38:24.266438+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-10-23T18:38:30.632824+09:00",
+        "skyfield_minus_kasi_display_seconds": -3.703,
+        "astronomy_engine_default_minus_kasi_display_seconds": 24.266,
+        "astronomy_engine_default_minus_skyfield_seconds": 27.97,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 34.336,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": false
+      },
+      {
+        "year": 2026,
+        "term": 19,
+        "name": "입동",
+        "skyfield_kst": "2026-11-07T18:52:04.338932+09:00",
+        "astronomy_engine_default_kst": "2026-11-07T18:52:33.363199+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-11-07T18:52:39.755115+09:00",
+        "skyfield_minus_kasi_display_seconds": 4.339,
+        "astronomy_engine_default_minus_kasi_display_seconds": 33.363,
+        "astronomy_engine_default_minus_skyfield_seconds": 29.024,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 35.416,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": false,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": false
+      },
+      {
+        "year": 2026,
+        "term": 20,
+        "name": "소설",
+        "skyfield_kst": "2026-11-22T16:23:20.563275+09:00",
+        "astronomy_engine_default_kst": "2026-11-22T16:23:34.114798+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-11-22T16:23:40.532107+09:00",
+        "skyfield_minus_kasi_display_seconds": 20.563,
+        "astronomy_engine_default_minus_kasi_display_seconds": 34.115,
+        "astronomy_engine_default_minus_skyfield_seconds": 13.552,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 19.969,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": false,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": false
+      },
+      {
+        "year": 2026,
+        "term": 21,
+        "name": "대설",
+        "skyfield_kst": "2026-12-07T11:52:31.469033+09:00",
+        "astronomy_engine_default_kst": "2026-12-07T11:52:47.190934+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-12-07T11:52:53.633467+09:00",
+        "skyfield_minus_kasi_display_seconds": -28.531,
+        "astronomy_engine_default_minus_kasi_display_seconds": -12.809,
+        "astronomy_engine_default_minus_skyfield_seconds": 15.722,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 22.164,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      },
+      {
+        "year": 2026,
+        "term": 22,
+        "name": "동지",
+        "skyfield_kst": "2026-12-22T05:50:14.174264+09:00",
+        "astronomy_engine_default_kst": "2026-12-22T05:50:22.187002+09:00",
+        "astronomy_engine_same_tt_skyfield_utc_kst": "2026-12-22T05:50:28.654692+09:00",
+        "skyfield_minus_kasi_display_seconds": 14.174,
+        "astronomy_engine_default_minus_kasi_display_seconds": 22.187,
+        "astronomy_engine_default_minus_skyfield_seconds": 8.013,
+        "astronomy_engine_same_tt_minus_skyfield_seconds": 14.48,
+        "skyfield_rounds_to_kasi_minute": true,
+        "astronomy_engine_default_rounds_to_kasi_minute": true,
+        "astronomy_engine_same_tt_rounds_to_kasi_minute": true
+      }
+    ],
+    "note_on_source_values": "The full KASI source is linked, not republished here. Deltas reference its rounded minute display. Computed engine timestamps preserve microseconds but do not imply microsecond physical accuracy."
+  },
+  "manseryeok_probe": {
+    "auditDate": "2026-10-20",
+    "package": {
+      "name": "@fullstackfamily/manseryeok",
+      "version": "1.0.8",
+      "tarballSha256": "42b517af8ef2aaf03506bbc3f2030d005be1bee807f5eaaf6b9e272a39f82556"
+    },
+    "method": "Imported fixed public npm package ESM; install/build scripts were not executed; no correction applied to birth wall time.",
+    "expectedRule": "Proposed comparison rule: year changes at Li Chun instant, month at each of 12 Jie instants. KASI values are minute-rounded KST; fixture inputs are at least 12 minutes away from boundary. This tests deterministic calendar boundaries, not predictive validity of fortune-telling.",
+    "reference": {
+      "sha256": "508761248c7d18eb1ca1bcb1fcace2ba29f3f511d085321ae1e633c74d8e9e34",
+      "parsedRows": 4344,
+      "clock": "KST UTC+9 fixed; no historical DST/meridian changes; source header dated 2026-09-01",
+      "selectedTerms": [
+        {
+          "termId": 1,
+          "year": 2025,
+          "month": 2,
+          "day": 3,
+          "hour": 23,
+          "minute": 10
+        },
+        {
+          "termId": 1,
+          "year": 2026,
+          "month": 2,
+          "day": 4,
+          "hour": 5,
+          "minute": 2
+        },
+        {
+          "termId": 3,
+          "year": 2026,
+          "month": 3,
+          "day": 5,
+          "hour": 22,
+          "minute": 59
+        }
+      ],
+      "source_url": "https://astro.kasi.re.kr/kor/almanac/solarTerms/download"
+    },
+    "cases": [
+      {
+        "input": [
+          2025,
+          2,
+          3,
+          22,
+          50
+        ],
+        "expected": {
+          "year": "甲辰",
+          "month": "丁丑"
+        },
+        "actual": {
+          "year": "甲辰",
+          "month": "丁丑",
+          "day": "癸卯",
+          "hour": "癸亥"
+        },
+        "yearMonthMatch": true
+      },
+      {
+        "input": [
+          2025,
+          2,
+          3,
+          23,
+          30
+        ],
+        "expected": {
+          "year": "乙巳",
+          "month": "戊寅"
+        },
+        "actual": {
+          "year": "甲辰",
+          "month": "丁丑",
+          "day": "癸卯",
+          "hour": "壬子"
+        },
+        "yearMonthMatch": false
+      },
+      {
+        "input": [
+          2025,
+          2,
+          4,
+          0,
+          30
+        ],
+        "expected": {
+          "year": "乙巳",
+          "month": "戊寅"
+        },
+        "actual": {
+          "year": "乙巳",
+          "month": "戊寅",
+          "day": "甲辰",
+          "hour": "甲子"
+        },
+        "yearMonthMatch": true
+      },
+      {
+        "input": [
+          2026,
+          2,
+          4,
+          4,
+          50
+        ],
+        "expected": {
+          "year": "乙巳",
+          "month": "己丑"
+        },
+        "actual": {
+          "year": "丙午",
+          "month": "庚寅",
+          "day": "己酉",
+          "hour": "丙寅"
+        },
+        "yearMonthMatch": false
+      },
+      {
+        "input": [
+          2026,
+          2,
+          4,
+          5,
+          15
+        ],
+        "expected": {
+          "year": "丙午",
+          "month": "庚寅"
+        },
+        "actual": {
+          "year": "丙午",
+          "month": "庚寅",
+          "day": "己酉",
+          "hour": "丁卯"
+        },
+        "yearMonthMatch": true
+      },
+      {
+        "input": [
+          2026,
+          3,
+          5,
+          22,
+          40
+        ],
+        "expected": {
+          "year": "丙午",
+          "month": "庚寅"
+        },
+        "actual": {
+          "year": "丙午",
+          "month": "庚寅",
+          "day": "戊寅",
+          "hour": "癸亥"
+        },
+        "yearMonthMatch": true
+      },
+      {
+        "input": [
+          2026,
+          3,
+          5,
+          23,
+          15
+        ],
+        "expected": {
+          "year": "丙午",
+          "month": "辛卯"
+        },
+        "actual": {
+          "year": "丙午",
+          "month": "庚寅",
+          "day": "戊寅",
+          "hour": "壬子"
+        },
+        "yearMonthMatch": false
+      },
+      {
+        "input": [
+          2026,
+          3,
+          6,
+          0,
+          30
+        ],
+        "expected": {
+          "year": "丙午",
+          "month": "辛卯"
+        },
+        "actual": {
+          "year": "丙午",
+          "month": "辛卯",
+          "day": "己卯",
+          "hour": "甲子"
+        },
+        "yearMonthMatch": true
+      }
+    ],
+    "calendarRange": {
+      "min": 1900,
+      "max": 2050
+    },
+    "solarTermSupportedYears": [
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025,
+      2026,
+      2027,
+      2028,
+      2029,
+      2030
+    ],
+    "uniqueAnnualTermArraysIgnoringYear": 1,
+    "lichunByYear": [
+      {
+        "name": "입춘",
+        "nameHanja": "立春",
+        "index": 0,
+        "longitude": 315,
+        "type": "jeolgi",
+        "sajuMonth": 2,
+        "year": 2020,
+        "month": 2,
+        "day": 4,
+        "hour": 5,
+        "minute": 2
+      },
+      {
+        "name": "입춘",
+        "nameHanja": "立春",
+        "index": 0,
+        "longitude": 315,
+        "type": "jeolgi",
+        "sajuMonth": 2,
+        "year": 2021,
+        "month": 2,
+        "day": 4,
+        "hour": 5,
+        "minute": 2
+      },
+      {
+        "name": "입춘",
+        "nameHanja": "立春",
+        "index": 0,
+        "longitude": 315,
+        "type": "jeolgi",
+        "sajuMonth": 2,
+        "year": 2022,
+        "month": 2,
+        "day": 4,
+        "hour": 5,
+        "minute": 2
+      },
+      {
+        "name": "입춘",
+        "nameHanja": "立春",
+        "index": 0,
+        "longitude": 315,
+        "type": "jeolgi",
+        "sajuMonth": 2,
+        "year": 2023,
+        "month": 2,
+        "day": 4,
+        "hour": 5,
+        "minute": 2
+      },
+      {
+        "name": "입춘",
+        "nameHanja": "立春",
+        "index": 0,
+        "longitude": 315,
+        "type": "jeolgi",
+        "sajuMonth": 2,
+        "year": 2024,
+        "month": 2,
+        "day": 4,
+        "hour": 5,
+        "minute": 2
+      },
+      {
+        "name": "입춘",
+        "nameHanja": "立春",
+        "index": 0,
+        "longitude": 315,
+        "type": "jeolgi",
+        "sajuMonth": 2,
+        "year": 2025,
+        "month": 2,
+        "day": 4,
+        "hour": 5,
+        "minute": 2
+      },
+      {
+        "name": "입춘",
+        "nameHanja": "立春",
+        "index": 0,
+        "longitude": 315,
+        "type": "jeolgi",
+        "sajuMonth": 2,
+        "year": 2026,
+        "month": 2,
+        "day": 4,
+        "hour": 5,
+        "minute": 2
+      },
+      {
+        "name": "입춘",
+        "nameHanja": "立春",
+        "index": 0,
+        "longitude": 315,
+        "type": "jeolgi",
+        "sajuMonth": 2,
+        "year": 2027,
+        "month": 2,
+        "day": 4,
+        "hour": 5,
+        "minute": 2
+      },
+      {
+        "name": "입춘",
+        "nameHanja": "立春",
+        "index": 0,
+        "longitude": 315,
+        "type": "jeolgi",
+        "sajuMonth": 2,
+        "year": 2028,
+        "month": 2,
+        "day": 4,
+        "hour": 5,
+        "minute": 2
+      },
+      {
+        "name": "입춘",
+        "nameHanja": "立春",
+        "index": 0,
+        "longitude": 315,
+        "type": "jeolgi",
+        "sajuMonth": 2,
+        "year": 2029,
+        "month": 2,
+        "day": 4,
+        "hour": 5,
+        "minute": 2
+      },
+      {
+        "name": "입춘",
+        "nameHanja": "立春",
+        "index": 0,
+        "longitude": 315,
+        "type": "jeolgi",
+        "sajuMonth": 2,
+        "year": 2030,
+        "month": 2,
+        "day": 4,
+        "hour": 5,
+        "minute": 2
+      }
+    ],
+    "unsupportedYearError": "No solar terms data for year 1993. Supported years: 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030",
+    "source_commit": "b37b6b4e47d1710df48396799e51102eefa7f0c1",
+    "source_url": "https://github.com/urstory/manseryeok-js"
+  },
+  "korean_chinese_probe": {
+    "audit_date": "2026-10-20",
+    "korean_version": "0.4.0",
+    "korean_commit": "128a9b482dd34ea6185298d335de2c8d3f378d4c",
+    "lunar_python_commit": "448f397c1695cadab3899bf460e0042cab7f0e66",
+    "method": "Executed source checkouts at recorded commits; no install scripts; no network calls during calculations. Cross-library comparison is not itself independent official verification.",
+    "korean_chinese_comparisons": [
+      {
+        "solar": [
+          2017,
+          6,
+          24
+        ],
+        "korean": {
+          "valid": true,
+          "year": 2017,
+          "month": 5,
+          "day": 1,
+          "leap": true
+        },
+        "chinese": {
+          "year": 2017,
+          "month": 6,
+          "day": 1,
+          "leap": false
+        }
+      },
+      {
+        "solar": [
+          2017,
+          7,
+          23
+        ],
+        "korean": {
+          "valid": true,
+          "year": 2017,
+          "month": 6,
+          "day": 1,
+          "leap": false
+        },
+        "chinese": {
+          "year": 2017,
+          "month": 6,
+          "day": 1,
+          "leap": true
+        }
+      },
+      {
+        "solar": [
+          2023,
+          3,
+          22
+        ],
+        "korean": {
+          "valid": true,
+          "year": 2023,
+          "month": 2,
+          "day": 1,
+          "leap": true
+        },
+        "chinese": {
+          "year": 2023,
+          "month": 2,
+          "day": 1,
+          "leap": true
+        }
+      },
+      {
+        "solar": [
+          2026,
+          2,
+          17
+        ],
+        "korean": {
+          "valid": true,
+          "year": 2026,
+          "month": 1,
+          "day": 1,
+          "leap": false
+        },
+        "chinese": {
+          "year": 2026,
+          "month": 1,
+          "day": 1,
+          "leap": false
+        }
+      }
+    ],
+    "lunar_python_clock_examples": [
+      {
+        "raw_wall_input": [
+          2026,
+          2,
+          4,
+          4,
+          50,
+          0
+        ],
+        "lichun_raw_utc8": "2026-02-04 04:02:08",
+        "eight_char": "丙午 庚寅 己酉 丙寅"
+      },
+      {
+        "raw_wall_input": [
+          2026,
+          2,
+          4,
+          3,
+          50,
+          0
+        ],
+        "lichun_raw_utc8": "2026-02-04 04:02:08",
+        "eight_char": "乙巳 己丑 己酉 丙寅"
+      },
+      {
+        "raw_wall_input": [
+          2026,
+          2,
+          4,
+          5,
+          15,
+          0
+        ],
+        "lichun_raw_utc8": "2026-02-04 04:02:08",
+        "eight_char": "丙午 庚寅 己酉 丁卯"
+      }
+    ],
+    "notes": "6tail raw Solar wall inputs have no IANA timezone field. ShouXingUtil.qiAccurate adds 1/3 day (=UTC+8). Converting KST to UTC+8 repairs instant comparison but blindly shifting all four-pillar civil inputs may move the day/hour boundary. Korean solar/lunar conversion and day/hour rules require separate adapters."
+  }
+}

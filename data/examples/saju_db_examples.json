@@ -1,0 +1,1496 @@
+{
+  "metadata": {
+    "document_type": "database_materials_examples_and_plan",
+    "prepared_for_local_date": "2026-10-20",
+    "timezone": "Asia/Seoul",
+    "project": "fortune-ai-companion",
+    "implementation_status": "planning_only",
+    "database_connected": false,
+    "ddl_created_or_executed": false,
+    "api_authenticated_or_called": false,
+    "evaluation_executed": false,
+    "approval_status": "not_approved",
+    "notice": "첨부 조사자료를 바탕으로 만든 제안 및 입력 템플릿이다. 운영 DB 연결, 원천 API 인증 호출, 계산 구현, 검증 실행 또는 정책 승인을 완료했다는 의미가 아니다.",
+    "scope_note": "10월 25일 목표는 검증 가능한 범위의 자료 패키지와 DB 연결 데모로 제안한다. 앱 전체 상용 출시 일정은 별도로 합의한다.",
+    "mvp_feature_scope": "검증된 범위의 연·월·일·시주, 시간 미상 및 복수 후보, 단순 오행 개수, 승인된 십성 규칙, 짧은 연애 주제 해석을 우선한다. 가중 오행, 강약, 용신, 대운, 궁합 점수는 근거와 규칙 승인 전 제외한다.",
+    "source_links": [
+      "https://www.data.go.kr/data/15012679/openapi.do",
+      "https://www.data.go.kr/data/15012690/openapi.do",
+      "https://www.iana.org/time-zones",
+      "https://www.postgresql.org/docs/current/ddl-constraints.html",
+      "https://www.postgresql.org/docs/current/datatype-json.html"
+    ],
+    "version": "0.1-draft",
+    "feature_schema_version": "draft-1",
+    "condition_schema_version": 1,
+    "approved_interpretation_count": 0,
+    "calendar_day_rows_included": 0,
+    "solar_term_rows_included": 0,
+    "note": "Excel과 JSON은 제공 시점의 같은 초안입니다. Excel 수정은 JSON에 자동 반영되지 않습니다. 운영 반입 시 판 번호·참조·근거·검수 상태를 재검증해야 합니다."
+  },
+  "sources": [
+    {
+      "source_id": "SRC_BACKEND_REPORT",
+      "title": "제공된 사주 백엔드 조사자료",
+      "kind": "user_report",
+      "provider": "사용자 제공",
+      "locator": "saju-backend-research(1).md, 2·4·6·8·9절",
+      "url": null,
+      "usage": "원천·정책·DB 설계 참고",
+      "conditions": "제공자료의 외부 배포 조건은 별도 확인",
+      "document_status": "provided_text_read",
+      "data_status": "실제 원천·계산 검증 완료 자료 아님",
+      "checked_date": "2026-10-20"
+    },
+    {
+      "source_id": "SRC_PRODUCT_REPORT",
+      "title": "Baeun One·Manyfast 종합 조사보고서",
+      "kind": "user_report",
+      "provider": "사용자 제공",
+      "locator": "대화 제공 보고서 5·8·9절",
+      "url": "https://manyfast.io/share/og3qt503sBr_5f3y23XDkzoK7h2UXLIUnfFbjJ9bOte_j7B2xsTZFFCqSUqXmiLp",
+      "usage": "입력·리딩·기억·삭제 등 제품 요구사항",
+      "conditions": "제공 보고서에 근거. 내부 사이트 재조사 미실행",
+      "document_status": "provided_text_read",
+      "data_status": "구현 및 수용 기준 통과 증거 아님",
+      "checked_date": "2026-10-20"
+    },
+    {
+      "source_id": "SRC_KASI_LUNAR",
+      "title": "한국천문연구원 음양력 정보",
+      "kind": "calendar_api",
+      "provider": "한국천문연구원·공공데이터포털",
+      "locator": "공개 요청·응답 필드 및 이용조건",
+      "url": "https://www.data.go.kr/data/15012679/openapi.do",
+      "usage": "양음력·윤달·일진 원천 수집 후보",
+      "conditions": "공개 페이지: 무료·이용허락범위 제한 없음",
+      "document_status": "public_document_checked",
+      "data_status": "인증 응답·전체 연도 범위 미검증",
+      "checked_date": "2026-10-20"
+    },
+    {
+      "source_id": "SRC_KASI_TERMS",
+      "title": "한국천문연구원 특일 정보",
+      "kind": "solar_term_api_candidate",
+      "provider": "한국천문연구원·공공데이터포털",
+      "locator": "24절기 포함 서비스 설명. 기본 상세는 기념일",
+      "url": "https://www.data.go.kr/data/15012690/openapi.do",
+      "usage": "24절기 전용 응답 확인 후보",
+      "conditions": "공개 페이지: 무료·이용허락범위 제한 없음",
+      "document_status": "public_document_checked",
+      "data_status": "절기 시각 필드·정밀도·과거 범위 미검증",
+      "checked_date": "2026-10-20"
+    },
+    {
+      "source_id": "SRC_KASI_ALMANAC",
+      "title": "KASI 월력요항 공식 안내",
+      "kind": "published_almanac",
+      "provider": "한국천문연구원",
+      "locator": "2004년 이후 자료·2020년 이후 관보 링크 안내",
+      "url": "https://astro.kasi.re.kr/kor/life/post/almanac",
+      "usage": "확정된 절기 원천 및 공개범위 확인",
+      "conditions": "개별 취득 자료의 이용조건·판본 기록 필요",
+      "document_status": "public_document_checked",
+      "data_status": "전 연도 원문·시각 자료 수집 미실행",
+      "checked_date": "2026-10-20"
+    },
+    {
+      "source_id": "SRC_IANA_TZ",
+      "title": "IANA Time Zone Database",
+      "kind": "timezone_reference",
+      "provider": "IANA",
+      "locator": "개요와 release별 데이터",
+      "url": "https://www.iana.org/time-zones",
+      "usage": "역사적 현지 시각·offset·DST 정규화",
+      "conditions": "실제 사용 release와 관련 고지 기록 필요",
+      "document_status": "public_document_checked",
+      "data_status": "앱 정규화 구현·테스트 미실행",
+      "checked_date": "2026-10-20"
+    },
+    {
+      "source_id": "SRC_POSTGRES_DOCS",
+      "title": "PostgreSQL JSONB·제약조건 문서",
+      "kind": "technical_documentation",
+      "provider": "PostgreSQL",
+      "locator": "JSON Types / Constraints",
+      "url": "https://www.postgresql.org/docs/current/datatype-json.html",
+      "usage": "JSONB·복합키를 사용하는 설계 참고",
+      "conditions": "기술 문서. 사주 데이터 원천과 구별",
+      "document_status": "public_document_checked",
+      "data_status": "DB 및 migration 실행 미실행",
+      "checked_date": "2026-10-20"
+    },
+    {
+      "source_id": "SRC_AUTHORED_DRAFTS",
+      "title": "이번 작업에서 작성한 예시 원고",
+      "kind": "authored_examples",
+      "provider": "AI 작성 초안",
+      "locator": "제공 예제 8개 원고",
+      "url": null,
+      "usage": "작성 형식과 적용 조건의 예시",
+      "conditions": "명리 의미 검수 아님. 정책·근거 승인 필요",
+      "document_status": "authored_draft",
+      "data_status": "8개 전부 draft, publishable=false",
+      "checked_date": "2026-10-20"
+    }
+  ],
+  "entries": [
+    {
+      "entry_id": "K_SAJU_TIME_UNKNOWN",
+      "revision": 1,
+      "domain": "saju",
+      "content_kind": "fallback",
+      "basis_type": "product_guidance",
+      "concept_id": "birth_time_unknown",
+      "topic": "uncertainty",
+      "title_ko": "출생시간을 모를 때의 안내",
+      "condition_id": "COND_TIME_UNKNOWN_V1",
+      "neutral_text": "출생시간이 확인되지 않아 현재 정보로 공통으로 확인되는 항목을 먼저 보여드릴게요. 시간에 따라 달라지는 항목은 구분해서 표시합니다.",
+      "helpful_question": "태어난 시간대를 대략이라도 기억하나요?",
+      "forbidden_claims": [
+        "정오 또는 임의의 시간을 실제 출생시간으로 확정",
+        "출생시간이 없어도 항상 시주만 달라진다고 안내",
+        "복수 후보 가운데 하나를 근거 없이 정답으로 선택"
+      ],
+      "memory_policy_ko": "시간을 모른다는 입력 상태를 보존합니다. 대화 중 추측한 시간을 사용자 확인 없이 출생 프로필에 저장하지 않습니다.",
+      "basis_source_id": null,
+      "source_requirement_ko": "정책표 승인 필요: 시간 미상 입력, 후보 구간, 부분 결과 화면의 동작 명세를 근거로 연결해야 합니다.",
+      "text_provenance": "assistant_authored_example",
+      "external_text_used": false,
+      "authored_date": "2026-10-20",
+      "locale": "ko-KR",
+      "compatible_rule_set_ids": [],
+      "conflict_group": null,
+      "review_status": "draft",
+      "publishable": false
+    },
+    {
+      "entry_id": "K_SAJU_VISIBLE_WATER_ZERO",
+      "revision": 1,
+      "domain": "saju",
+      "content_kind": "concept",
+      "basis_type": "calculation_fact",
+      "concept_id": "visible_water_count_zero",
+      "topic": "calculation_explanation",
+      "title_ko": "표시된 여덟 글자에서 수가 0인 경우",
+      "condition_id": "COND_VISIBLE_WATER_ZERO_COMPLETE_V1",
+      "neutral_text": "현재 표시된 여덟 글자의 단순 집계에서는 수(水)가 포함되어 있지 않습니다. 이 개수만으로 성격이나 연애 결과를 판단하지는 않습니다.",
+      "helpful_question": "오행 집계 방식을 더 볼까요, 아니면 지금 관계에서 궁금한 점을 이야기해 볼까요?",
+      "forbidden_claims": [
+        "수의 부재를 실제 성격으로 확정",
+        "이별·외로움·질병 등의 결과 예측",
+        "단순 집계를 지장간 가중 오행 균형으로 표현",
+        "누락된 시주를 수 0개로 취급"
+      ],
+      "memory_policy_ko": "계산 결과의 설명으로만 사용합니다. 외로운 성격 등의 사용자 사실로 변환해 저장하지 않습니다.",
+      "basis_source_id": null,
+      "source_requirement_ko": "정책표 승인 필요: 표시된 여덟 글자의 오행 매핑과 단순 집계 정의, 확정·부분·모호 상태 판정, 후보별 공통 조건 판정을 검수해야 합니다. 이 초안은 해당 계산 규칙을 검증한 결과가 아닙니다.",
+      "text_provenance": "assistant_authored_example",
+      "external_text_used": false,
+      "authored_date": "2026-10-20",
+      "locale": "ko-KR",
+      "compatible_rule_set_ids": [],
+      "conflict_group": null,
+      "review_status": "draft",
+      "publishable": false
+    },
+    {
+      "entry_id": "D_CONTACT_WAITING",
+      "revision": 1,
+      "domain": "conversation",
+      "content_kind": "situation",
+      "basis_type": "user_context",
+      "concept_id": "waiting_for_reply_without_mindreading",
+      "topic": "contact",
+      "title_ko": "답장을 기다리는 상황",
+      "condition_id": "COND_CONTACT_WAITING_V1",
+      "neutral_text": "답장을 기다리는 동안 신경이 쓰일 수 있어요. 지금 대화만으로 상대의 이유를 알기는 어려워요.",
+      "helpful_question": "평소 답장 간격과 비교하면 얼마나 달라졌나요?",
+      "forbidden_claims": [
+        "상대가 변심했다고 단정",
+        "사주 때문에 연락이 늦는다고 주장",
+        "상대가 바쁜 것이 확실하다고 추정",
+        "사용자가 말하지 않은 관계 상태나 감정을 확정"
+      ],
+      "memory_policy_ko": "현재 대화의 일시적 상황으로 사용합니다. 장기 기억으로 저장하려면 필요성과 사용 허용 상태를 별도로 확인합니다.",
+      "basis_source_id": null,
+      "source_requirement_ko": "원고 문장은 이 답변에서 작성한 예시입니다. 실제 적용 근거는 사용자 메시지여야 합니다. 정책표 승인 필요: 발화 근거 검증과 일시적 맥락 보존 기준.",
+      "text_provenance": "assistant_authored_example",
+      "external_text_used": false,
+      "authored_date": "2026-10-20",
+      "locale": "ko-KR",
+      "compatible_rule_set_ids": [],
+      "conflict_group": null,
+      "review_status": "draft",
+      "publishable": false
+    },
+    {
+      "entry_id": "D_COMMUNICATION_PREFERENCE",
+      "revision": 1,
+      "domain": "conversation",
+      "content_kind": "situation",
+      "basis_type": "user_context",
+      "concept_id": "confirmed_contact_preference",
+      "topic": "contact",
+      "title_ko": "사용자가 확인한 연락 선호",
+      "condition_id": "COND_COMMUNICATION_PREFERENCE_V1",
+      "neutral_text": "네가 편안하게 느끼는 연락 방식과 상대가 익숙한 방식이 어떻게 다른지 함께 살펴볼 수 있어요.",
+      "helpful_question": "상대에게 부탁하고 싶은 연락 방식 한 가지만 고르면 무엇인가요?",
+      "forbidden_claims": [
+        "사용자의 선호를 사주가 입증한다고 표현",
+        "상대에게도 같은 선호가 있다고 추정",
+        "사용자가 확인하지 않은 구체적인 연락 빈도를 만들어냄",
+        "철회되거나 만료된 기억을 현재 선호로 취급"
+      ],
+      "memory_policy_ko": "유효한 근거와 사용 허용 상태를 가진 연락 선호만 참조합니다. 새로운 답으로 기존 선호가 바뀌면 수정·대체 관계를 기록하도록 설계합니다.",
+      "basis_source_id": null,
+      "source_requirement_ko": "원고 문장은 이 답변에서 작성한 예시입니다. 실제 선호의 근거는 사용자가 확인한 발화여야 합니다. 정책표 승인 필요: 기억 사용 동의, 유효기간, 변경·철회 처리.",
+      "text_provenance": "assistant_authored_example",
+      "external_text_used": false,
+      "authored_date": "2026-10-20",
+      "locale": "ko-KR",
+      "compatible_rule_set_ids": [],
+      "conflict_group": null,
+      "review_status": "draft",
+      "publishable": false
+    },
+    {
+      "entry_id": "D_FOLLOWUP_USER_ACTION",
+      "revision": 1,
+      "domain": "conversation",
+      "content_kind": "followup",
+      "basis_type": "user_context",
+      "concept_id": "user_selected_action_followup",
+      "topic": "small_goal",
+      "title_ko": "사용자가 선택한 작은 행동의 후속 확인",
+      "condition_id": "COND_GOAL_FOLLOWUP_V1",
+      "neutral_text": "지난번에 이야기한 방법을 시도해 봤나요? 해보지 않았어도 괜찮아요.",
+      "helpful_question": "지금 상황에 맞게 더 작은 단계로 바꿔볼까요?",
+      "forbidden_claims": [
+        "사용자가 행동을 실행했다고 추정",
+        "AI가 제안했을 뿐인 행동을 사용자의 약속으로 취급",
+        "미실행을 관계 실패나 결제 필요에 연결",
+        "후속 확인을 허용하지 않은 기억을 사용"
+      ],
+      "memory_policy_ko": "사용자가 직접 선택한 행동, 후속 확인 허용, 유효한 근거 메시지를 모두 요구합니다. 실행 여부는 새 사용자 발화로 확인하며 임의로 완료 처리하지 않습니다.",
+      "basis_source_id": null,
+      "source_requirement_ko": "정책표 승인 필요: 사용자 직접 선택과 단순 AI 제안 구분, 후속 확인 허용, 만료·철회·기한 판정. 문장은 자체 작성 예시이며 실제 행동이나 동의 기록을 만들지 않았습니다.",
+      "text_provenance": "assistant_authored_example",
+      "external_text_used": false,
+      "authored_date": "2026-10-20",
+      "locale": "ko-KR",
+      "compatible_rule_set_ids": [],
+      "conflict_group": null,
+      "review_status": "draft",
+      "publishable": false
+    },
+    {
+      "entry_id": "K_INTERPRETATION_GENERATION_FAILED",
+      "revision": 1,
+      "domain": "saju",
+      "content_kind": "fallback",
+      "basis_type": "product_guidance",
+      "concept_id": "interpretation_failure_chart_preserved",
+      "topic": "service_failure",
+      "title_ko": "계산 결과가 있는 상태에서 해석 생성 실패",
+      "condition_id": "COND_INTERPRETATION_FAILED_CHART_AVAILABLE_V1",
+      "neutral_text": "확인 가능한 계산 결과는 준비되었지만 설명을 생성하지 못했어요. 현재 확인된 계산 항목부터 볼 수 있습니다.",
+      "helpful_question": "확인 가능한 계산 항목부터 살펴볼까요?",
+      "forbidden_claims": [
+        "해석 실패를 계산 실패와 동일하게 안내",
+        "실패한 해석을 완성된 결과로 표시",
+        "계산하지 않은 값으로 임시 해석을 만들어 제공",
+        "실제로 제공하지 않는 재시도·환불 기능이 있다고 약속"
+      ],
+      "memory_policy_ko": "서비스 실행 상태만 다루며 사용자 성격이나 관계에 관한 기억을 만들지 않습니다.",
+      "basis_source_id": null,
+      "source_requirement_ko": "정책표 승인 필요: 계산·해석의 분리된 실행 상태와 부분 결과 표시. 실제 API 계약·UI 동작과 일치하는지 검수해야 합니다.",
+      "text_provenance": "assistant_authored_example",
+      "external_text_used": false,
+      "authored_date": "2026-10-20",
+      "locale": "ko-KR",
+      "compatible_rule_set_ids": [],
+      "conflict_group": null,
+      "review_status": "draft",
+      "publishable": false
+    },
+    {
+      "entry_id": "K_SAJU_BOUNDARY_AMBIGUITY",
+      "revision": 1,
+      "domain": "saju",
+      "content_kind": "fallback",
+      "basis_type": "product_guidance",
+      "concept_id": "boundary_result_ambiguity",
+      "topic": "uncertainty",
+      "title_ko": "시간 경계에 걸린 후보 결과 안내",
+      "condition_id": "COND_BOUNDARY_AMBIGUITY_V1",
+      "neutral_text": "현재 시간 정보와 기준 자료로는 일부 계산 항목을 한 가지로 정하기 어려워요. 가능한 결과에서 공통으로 확인되는 내용을 먼저 보여드릴게요.",
+      "helpful_question": "출생기록에서 시간을 더 자세히 확인할 수 있나요?",
+      "forbidden_claims": [
+        "후보별 확률을 근거 없이 부여",
+        "절기 자료의 분 단위 표시를 초 단위 정확도로 표현",
+        "원천이나 입력 정밀도의 차이를 운명 변화로 표현",
+        "검수되지 않은 경계값을 확정값으로 선택"
+      ],
+      "memory_policy_ko": "계산 결과의 불확실성을 보존합니다. 정확한 출생시간을 새로 확인했다면 원본 입력 revision을 갱신하는 별도 절차로 처리합니다.",
+      "basis_source_id": null,
+      "source_requirement_ko": "정책표 승인 필요: 경계 시각의 원천 정밀도, 사용자 입력 범위, 후보 구간 산출과 공통 결과 정의. 실제 절기값이나 정확한 사주 결과를 이 초안에서 생성하지 않았습니다.",
+      "text_provenance": "assistant_authored_example",
+      "external_text_used": false,
+      "authored_date": "2026-10-20",
+      "locale": "ko-KR",
+      "compatible_rule_set_ids": [],
+      "conflict_group": null,
+      "review_status": "draft",
+      "publishable": false
+    },
+    {
+      "entry_id": "D_USER_CORRECTS_INTERPRETATION",
+      "revision": 1,
+      "domain": "conversation",
+      "content_kind": "followup",
+      "basis_type": "user_context",
+      "concept_id": "user_experience_over_interpretive_guess",
+      "topic": "user_correction",
+      "title_ko": "사용자가 해석과 자신의 경험이 다르다고 알림",
+      "condition_id": "COND_USER_CORRECTS_INTERPRETATION_V1",
+      "neutral_text": "그 설명이 네 경험과 맞지 않는다는 점을 알겠어요. 지금 알려준 경험을 기준으로 이야기해 볼 수 있어요.",
+      "helpful_question": "어떤 부분이 다르게 느껴졌나요?",
+      "forbidden_claims": [
+        "사주가 사용자 경험보다 정확하다고 반박",
+        "사용자 피드백에 맞추어 천간지지나 계산값을 바꿈",
+        "사용자의 수정 내용을 확인 없이 장기 성격 정보로 일반화",
+        "근거가 없는 명리 해석을 사용자 사실로 저장"
+      ],
+      "memory_policy_ko": "해석에 대한 피드백과 출생 프로필 변경을 구분합니다. 현재 발화는 현재 대화에 반영하고 장기 기억 저장은 별도 허용 기준에 따릅니다.",
+      "basis_source_id": null,
+      "source_requirement_ko": "원고 문장은 이 답변에서 작성한 예시입니다. 실제 적용 근거는 해석에 대한 사용자 수정 발화여야 합니다. 정책표 승인 필요: 사용자 피드백, 계산 불변성, 기억 수정 기준.",
+      "text_provenance": "assistant_authored_example",
+      "external_text_used": false,
+      "authored_date": "2026-10-20",
+      "locale": "ko-KR",
+      "compatible_rule_set_ids": [],
+      "conflict_group": null,
+      "review_status": "draft",
+      "publishable": false
+    }
+  ],
+  "conditions": [
+    {
+      "condition_id": "COND_TIME_UNKNOWN_V1",
+      "schema_version": 1,
+      "description_ko": "사용자가 출생시간을 모른다고 명시한 경우에만 안내합니다. 입력값 자체가 누락되거나 입력 검증이 실패한 경우와 구분합니다. 전체 또는 부분 계산 결과를 이미 확인할 수 있는 결과 화면에서 사용합니다.",
+      "all": [
+        {
+          "feature": "saju.input_time_precision",
+          "op": "eq",
+          "value": "unknown"
+        },
+        {
+          "feature": "saju.chart_status",
+          "op": "in",
+          "value": [
+            "ready",
+            "partial"
+          ]
+        }
+      ],
+      "candidate_policy": "not_applicable",
+      "unknown_result_policy": "exclude",
+      "status": "draft",
+      "feature_schema_version": "draft-1"
+    },
+    {
+      "condition_id": "COND_VISIBLE_WATER_ZERO_COMPLETE_V1",
+      "schema_version": 1,
+      "description_ko": "네 기둥이 모두 알려져 있고 표시된 여덟 글자의 단순 오행 집계가 확실한 값이며 수(水)가 0인 경우입니다. 여러 후보가 있으면 모든 유효 후보에서 조건이 참이어야 합니다.",
+      "all": [
+        {
+          "feature": "saju.known_pillar_count",
+          "op": "eq",
+          "value": 4
+        },
+        {
+          "feature": "saju.visible_element_counts_status",
+          "op": "eq",
+          "value": "exact"
+        },
+        {
+          "feature": "saju.visible_element_counts.water",
+          "op": "eq",
+          "value": 0
+        }
+      ],
+      "candidate_policy": "all_candidates_true",
+      "unknown_result_policy": "exclude",
+      "status": "draft",
+      "feature_schema_version": "draft-1"
+    },
+    {
+      "condition_id": "COND_CONTACT_WAITING_V1",
+      "schema_version": 1,
+      "description_ko": "현재 사용자 메시지에 답장을 기다린다는 상황이 직접 표현되어 있고 그 판단을 뒷받침하는 유효한 근거 메시지가 있을 때 적용합니다.",
+      "all": [
+        {
+          "feature": "context.user_reported_situation",
+          "op": "eq",
+          "value": "waiting_for_reply"
+        },
+        {
+          "feature": "context.current_evidence_valid",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "candidate_policy": "not_applicable",
+      "unknown_result_policy": "exclude",
+      "status": "draft",
+      "feature_schema_version": "draft-1"
+    },
+    {
+      "condition_id": "COND_COMMUNICATION_PREFERENCE_V1",
+      "schema_version": 1,
+      "description_ko": "사용자가 확인한 연락 선호가 있고, 해당 기억 사용이 허용되며, 근거가 유효하고 현재 활성 상태일 때 적용합니다.",
+      "all": [
+        {
+          "feature": "memory.communication_preference_status",
+          "op": "eq",
+          "value": "user_confirmed"
+        },
+        {
+          "feature": "memory.use_consent_status",
+          "op": "eq",
+          "value": "allowed"
+        },
+        {
+          "feature": "memory.evidence_valid",
+          "op": "eq",
+          "value": true
+        },
+        {
+          "feature": "memory.is_active",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "candidate_policy": "not_applicable",
+      "unknown_result_policy": "exclude",
+      "status": "draft",
+      "feature_schema_version": "draft-1"
+    },
+    {
+      "condition_id": "COND_GOAL_FOLLOWUP_V1",
+      "schema_version": 1,
+      "description_ko": "사용자가 직접 선택한 행동에 대한 후속 확인이 허용되었고, 유효한 발화 근거와 활성 상태를 유지하며, 확인 시점에 도달한 경우에만 적용합니다.",
+      "all": [
+        {
+          "feature": "memory.goal_origin",
+          "op": "eq",
+          "value": "user_selected"
+        },
+        {
+          "feature": "memory.goal_followup_consent",
+          "op": "eq",
+          "value": "allowed"
+        },
+        {
+          "feature": "memory.evidence_valid",
+          "op": "eq",
+          "value": true
+        },
+        {
+          "feature": "memory.is_active",
+          "op": "eq",
+          "value": true
+        },
+        {
+          "feature": "memory.goal_followup_due",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "candidate_policy": "not_applicable",
+      "unknown_result_policy": "exclude",
+      "status": "draft",
+      "feature_schema_version": "draft-1"
+    },
+    {
+      "condition_id": "COND_INTERPRETATION_FAILED_CHART_AVAILABLE_V1",
+      "schema_version": 1,
+      "description_ko": "해석 생성은 실패했지만 전체 또는 부분 계산 결과를 확인할 수 있는 경우에만 적용합니다. 계산 자체가 실패한 경우에는 사용하지 않습니다.",
+      "all": [
+        {
+          "feature": "interpretation.status",
+          "op": "eq",
+          "value": "failed"
+        },
+        {
+          "feature": "saju.chart_status",
+          "op": "in",
+          "value": [
+            "ready",
+            "partial"
+          ]
+        }
+      ],
+      "candidate_policy": "not_applicable",
+      "unknown_result_policy": "exclude",
+      "status": "draft",
+      "feature_schema_version": "draft-1"
+    },
+    {
+      "condition_id": "COND_BOUNDARY_AMBIGUITY_V1",
+      "schema_version": 1,
+      "description_ko": "계산 엔진이 출생 구간과 경계 자료의 정밀도를 고려해 경계 관련 복수 후보가 있음을 명시한 경우에만 적용합니다. 전체 또는 부분 계산 결과를 이미 확인할 수 있는 결과 화면에서 사용합니다.",
+      "all": [
+        {
+          "feature": "saju.has_boundary_ambiguity",
+          "op": "eq",
+          "value": true
+        },
+        {
+          "feature": "saju.chart_status",
+          "op": "in",
+          "value": [
+            "ready",
+            "partial"
+          ]
+        }
+      ],
+      "candidate_policy": "not_applicable",
+      "unknown_result_policy": "exclude",
+      "status": "draft",
+      "feature_schema_version": "draft-1"
+    },
+    {
+      "condition_id": "COND_USER_CORRECTS_INTERPRETATION_V1",
+      "schema_version": 1,
+      "description_ko": "사용자가 앞선 해석이 자신의 경험과 다르다고 직접 알렸고, 이를 뒷받침하는 현재 근거 메시지가 유효한 경우에 적용합니다.",
+      "all": [
+        {
+          "feature": "context.user_corrected_interpretation",
+          "op": "eq",
+          "value": true
+        },
+        {
+          "feature": "context.current_evidence_valid",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "candidate_policy": "not_applicable",
+      "unknown_result_policy": "exclude",
+      "status": "draft",
+      "feature_schema_version": "draft-1"
+    }
+  ],
+  "features": [
+    {
+      "feature_key": "saju.input_time_precision",
+      "label_ko": "원본 출생시간 정밀도",
+      "data_type": "enum",
+      "allowed_values": [
+        "unknown",
+        "exact_minute",
+        "exact_second",
+        "approx_interval"
+      ],
+      "unit": null,
+      "source_kind": "user_input",
+      "proposed_producer": "birth_input_validator",
+      "definition_ko": "사용자가 명시한 시간 정밀도입니다. unknown은 시간을 모른다는 확정된 입력 상태이며 필드 누락이나 입력 오류와 다릅니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "saju.known_pillar_count",
+      "label_ko": "확정된 기둥 수",
+      "data_type": "integer",
+      "allowed_values": null,
+      "unit": "pillar",
+      "source_kind": "calculation",
+      "proposed_producer": "pillar_engine",
+      "definition_ko": "현재 유효한 차트에서 확정적으로 알려진 연·월·일·시 기둥의 수입니다. 값 범위는 0~4이며 후보 결과의 차이를 없애기 위해 임의로 4를 넣지 않습니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "saju.visible_element_counts.water",
+      "label_ko": "표시된 글자의 수 오행 단순 개수",
+      "data_type": "integer",
+      "allowed_values": null,
+      "unit": "visible_character",
+      "source_kind": "calculation",
+      "proposed_producer": "feature_engine",
+      "definition_ko": "승인된 오행 매핑에 따라 화면에 표시하는 천간·지지 글자에서 수에 해당하는 글자를 단순 집계하는 제안 필드입니다. 완전한 네 기둥 기준 범위는 0~8입니다. 지장간 가중치나 강약 판단이 포함되지 않습니다. 매핑과 계산 정책 검수 전입니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "saju.visible_element_counts_status",
+      "label_ko": "표시 오행 집계 상태",
+      "data_type": "enum",
+      "allowed_values": [
+        "exact",
+        "partial",
+        "ambiguous",
+        "unavailable"
+      ],
+      "unit": null,
+      "source_kind": "calculation",
+      "proposed_producer": "feature_engine",
+      "definition_ko": "exact는 적용된 계산 정책 안에서 완전하고 확실한 집계가 확보되었다는 뜻입니다. 예측 능력이나 전통 해석의 과학적 정확성을 뜻하지 않습니다. partial·ambiguous·unavailable을 0개와 혼동하지 않습니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "context.user_reported_situation",
+      "label_ko": "사용자가 직접 보고한 현재 상황",
+      "data_type": "enum",
+      "allowed_values": [
+        "waiting_for_reply",
+        "other",
+        "unknown"
+      ],
+      "unit": null,
+      "source_kind": "user_message",
+      "proposed_producer": "context_grounding_service",
+      "definition_ko": "현재 사용자 발화가 직접 뒷받침하는 상황 태그입니다. waiting_for_reply는 답장을 기다린다는 표현을 근거로 확인할 수 있을 때만 부여합니다. 모델의 추측만으로 태그를 확정하지 않습니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "context.current_evidence_valid",
+      "label_ko": "현재 상황을 뒷받침하는 발화 근거 유효 여부",
+      "data_type": "boolean",
+      "allowed_values": [
+        true,
+        false
+      ],
+      "unit": null,
+      "source_kind": "evidence_validation",
+      "proposed_producer": "context_grounding_service",
+      "definition_ko": "참조 메시지가 존재하고 현재 사용자 소유권·삭제 상태·접근 범위를 통과하며, 해당 상황이나 수정 발화를 실제로 뒷받침할 때 true입니다. 메시지 ID가 존재한다는 이유만으로 의미상의 근거가 검증된 것은 아닙니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "memory.communication_preference_status",
+      "label_ko": "연락 선호의 사용자 확인 상태",
+      "data_type": "enum",
+      "allowed_values": [
+        "user_confirmed",
+        "unconfirmed",
+        "withdrawn",
+        "absent"
+      ],
+      "unit": null,
+      "source_kind": "user_memory",
+      "proposed_producer": "memory_service",
+      "definition_ko": "사용자가 직접 확인한 연락 선호와 아직 확인하지 않은 추론을 구분합니다. user_confirmed는 근거 발화로 확인할 수 있어야 합니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "memory.use_consent_status",
+      "label_ko": "해당 기억의 사용 허용 상태",
+      "data_type": "enum",
+      "allowed_values": [
+        "allowed",
+        "denied",
+        "unknown"
+      ],
+      "unit": null,
+      "source_kind": "consent_record",
+      "proposed_producer": "memory_service",
+      "definition_ko": "이번 대화에서 해당 기억을 사용할 수 있는지 확인하는 제안 상태값입니다. 가입 여부나 발화 존재를 기억 사용 허용과 자동으로 동일시하지 않습니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "memory.evidence_valid",
+      "label_ko": "참조 기억의 발화 근거 유효 여부",
+      "data_type": "boolean",
+      "allowed_values": [
+        true,
+        false
+      ],
+      "unit": null,
+      "source_kind": "evidence_validation",
+      "proposed_producer": "memory_service",
+      "definition_ko": "기억이 참조한 발화가 존재하고 해당 사용자·캐릭터 접근 범위, 삭제·철회, 의미상의 뒷받침을 통과한 상태입니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "memory.is_active",
+      "label_ko": "참조 기억의 활성 상태",
+      "data_type": "boolean",
+      "allowed_values": [
+        true,
+        false
+      ],
+      "unit": null,
+      "source_kind": "memory_state",
+      "proposed_producer": "memory_service",
+      "definition_ko": "해당 기억이 만료·폐기·삭제·대체되지 않았고 현재 사용할 수 있는 상태일 때 true입니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "memory.goal_origin",
+      "label_ko": "작은 행동의 선택 주체",
+      "data_type": "enum",
+      "allowed_values": [
+        "user_selected",
+        "assistant_suggested",
+        "unknown"
+      ],
+      "unit": null,
+      "source_kind": "user_message",
+      "proposed_producer": "memory_service",
+      "definition_ko": "user_selected는 사용자가 행동을 직접 선택하거나 명시적으로 수락한 근거 발화가 있다는 뜻입니다. AI가 제안했을 뿐인 행동은 assistant_suggested로 구분합니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "memory.goal_followup_consent",
+      "label_ko": "작은 행동 후속 확인 허용 상태",
+      "data_type": "enum",
+      "allowed_values": [
+        "allowed",
+        "denied",
+        "unknown"
+      ],
+      "unit": null,
+      "source_kind": "consent_record",
+      "proposed_producer": "memory_service",
+      "definition_ko": "해당 행동의 수행 여부를 나중에 다시 물어보는 데 대한 허용 상태입니다. 행동 선택과 후속 확인 허용을 서로 다른 조건으로 확인합니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "memory.goal_followup_due",
+      "label_ko": "작은 행동의 후속 확인 시점 도달",
+      "data_type": "boolean",
+      "allowed_values": [
+        true,
+        false
+      ],
+      "unit": null,
+      "source_kind": "application_policy",
+      "proposed_producer": "memory_service",
+      "definition_ko": "사용자가 정한 시점 또는 승인된 후속 확인 정책에 따라 현재 다시 물어볼 시점인지 판단합니다. 미정인 확인 시점을 임의로 도달 처리하지 않습니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "interpretation.status",
+      "label_ko": "해석 생성 실행 상태",
+      "data_type": "enum",
+      "allowed_values": [
+        "pending",
+        "succeeded",
+        "failed"
+      ],
+      "unit": null,
+      "source_kind": "execution_state",
+      "proposed_producer": "interpretation_service",
+      "definition_ko": "이번 해석 생성 작업의 상태입니다. 계산 작업의 성공·실패와 분리합니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "saju.chart_status",
+      "label_ko": "사주 계산 결과 가용 상태",
+      "data_type": "enum",
+      "allowed_values": [
+        "ready",
+        "partial",
+        "failed",
+        "absent"
+      ],
+      "unit": null,
+      "source_kind": "execution_state",
+      "proposed_producer": "chart_service",
+      "definition_ko": "ready는 해당 정책에서 전체 결과를 확인할 수 있는 상태, partial은 일부 결과만 확인 가능한 상태입니다. 어떤 상태에서 무엇을 표시할지 API 계약으로 승인해야 합니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "saju.has_boundary_ambiguity",
+      "label_ko": "시간 경계 때문에 복수 후보가 생겼는지 여부",
+      "data_type": "boolean",
+      "allowed_values": [
+        true,
+        false
+      ],
+      "unit": null,
+      "source_kind": "calculation",
+      "proposed_producer": "birth_time_normalizer_and_pillar_engine",
+      "definition_ko": "원본 시간 범위와 경계 자료의 정밀도를 고려했을 때 적용 정책의 경계에서 둘 이상의 결과 후보가 생기는지를 표시하는 제안 필드입니다. 실제 경계 산출 규칙은 검수 전입니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    },
+    {
+      "feature_key": "context.user_corrected_interpretation",
+      "label_ko": "사용자의 해석 불일치 보고 여부",
+      "data_type": "boolean",
+      "allowed_values": [
+        true,
+        false
+      ],
+      "unit": null,
+      "source_kind": "user_message",
+      "proposed_producer": "context_grounding_service",
+      "definition_ko": "사용자가 앞선 해석이 자신의 경험과 다르다고 직접 표현한 근거가 있을 때 true입니다. 단순 침묵이나 짧은 답변을 수정 발화로 추정하지 않습니다.",
+      "unknown_behavior_ko": "필드 누락·근거 부족·판정 불가를 숫자 0이나 false로 자동 변환하지 않습니다. 조건 평가는 true/false/unknown을 구분하며 unknown이면 이 원고를 선택하지 않습니다. enum의 문자열 unknown은 명시된 상태값일 수 있으므로 null과 구분합니다.",
+      "definition_source_id": null,
+      "policy_requirement_ko": "정책표 승인 필요. 이 사전은 필드 계약 초안이며 실제 구현·원천 검증·도메인 승인을 증명하지 않습니다.",
+      "status": "draft"
+    }
+  ],
+  "reviews": [
+    {
+      "entry_id": "K_SAJU_TIME_UNKNOWN",
+      "revision": 1,
+      "domain_status": "not_reviewed",
+      "content_status": "not_reviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "review_status": "draft",
+      "blocking_issues_ko": [
+        "정책표 승인 필요: 시간 미상 입력, 후보 구간, 부분 결과 화면의 동작 명세를 근거로 연결해야 합니다.",
+        "적용 조건과 feature 계약 검수 필요",
+        "원고와 캐릭터 변환 시 의미 보존 검수 필요"
+      ],
+      "approval_note_ko": "검수 기록을 임의로 채우지 않았습니다. 승인 전에는 배포본에 포함하지 않습니다."
+    },
+    {
+      "entry_id": "K_SAJU_VISIBLE_WATER_ZERO",
+      "revision": 1,
+      "domain_status": "not_reviewed",
+      "content_status": "not_reviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "review_status": "draft",
+      "blocking_issues_ko": [
+        "정책표 승인 필요: 표시된 여덟 글자의 오행 매핑과 단순 집계 정의, 확정·부분·모호 상태 판정, 후보별 공통 조건 판정을 검수해야 합니다. 이 초안은 해당 계산 규칙을 검증한 결과가 아닙니다.",
+        "적용 조건과 feature 계약 검수 필요",
+        "원고와 캐릭터 변환 시 의미 보존 검수 필요"
+      ],
+      "approval_note_ko": "검수 기록을 임의로 채우지 않았습니다. 승인 전에는 배포본에 포함하지 않습니다."
+    },
+    {
+      "entry_id": "D_CONTACT_WAITING",
+      "revision": 1,
+      "domain_status": "not_reviewed",
+      "content_status": "not_reviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "review_status": "draft",
+      "blocking_issues_ko": [
+        "원고 문장은 이 답변에서 작성한 예시입니다. 실제 적용 근거는 사용자 메시지여야 합니다. 정책표 승인 필요: 발화 근거 검증과 일시적 맥락 보존 기준.",
+        "적용 조건과 feature 계약 검수 필요",
+        "원고와 캐릭터 변환 시 의미 보존 검수 필요"
+      ],
+      "approval_note_ko": "검수 기록을 임의로 채우지 않았습니다. 승인 전에는 배포본에 포함하지 않습니다."
+    },
+    {
+      "entry_id": "D_COMMUNICATION_PREFERENCE",
+      "revision": 1,
+      "domain_status": "not_reviewed",
+      "content_status": "not_reviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "review_status": "draft",
+      "blocking_issues_ko": [
+        "원고 문장은 이 답변에서 작성한 예시입니다. 실제 선호의 근거는 사용자가 확인한 발화여야 합니다. 정책표 승인 필요: 기억 사용 동의, 유효기간, 변경·철회 처리.",
+        "적용 조건과 feature 계약 검수 필요",
+        "원고와 캐릭터 변환 시 의미 보존 검수 필요"
+      ],
+      "approval_note_ko": "검수 기록을 임의로 채우지 않았습니다. 승인 전에는 배포본에 포함하지 않습니다."
+    },
+    {
+      "entry_id": "D_FOLLOWUP_USER_ACTION",
+      "revision": 1,
+      "domain_status": "not_reviewed",
+      "content_status": "not_reviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "review_status": "draft",
+      "blocking_issues_ko": [
+        "정책표 승인 필요: 사용자 직접 선택과 단순 AI 제안 구분, 후속 확인 허용, 만료·철회·기한 판정. 문장은 자체 작성 예시이며 실제 행동이나 동의 기록을 만들지 않았습니다.",
+        "적용 조건과 feature 계약 검수 필요",
+        "원고와 캐릭터 변환 시 의미 보존 검수 필요"
+      ],
+      "approval_note_ko": "검수 기록을 임의로 채우지 않았습니다. 승인 전에는 배포본에 포함하지 않습니다."
+    },
+    {
+      "entry_id": "K_INTERPRETATION_GENERATION_FAILED",
+      "revision": 1,
+      "domain_status": "not_reviewed",
+      "content_status": "not_reviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "review_status": "draft",
+      "blocking_issues_ko": [
+        "정책표 승인 필요: 계산·해석의 분리된 실행 상태와 부분 결과 표시. 실제 API 계약·UI 동작과 일치하는지 검수해야 합니다.",
+        "적용 조건과 feature 계약 검수 필요",
+        "원고와 캐릭터 변환 시 의미 보존 검수 필요"
+      ],
+      "approval_note_ko": "검수 기록을 임의로 채우지 않았습니다. 승인 전에는 배포본에 포함하지 않습니다."
+    },
+    {
+      "entry_id": "K_SAJU_BOUNDARY_AMBIGUITY",
+      "revision": 1,
+      "domain_status": "not_reviewed",
+      "content_status": "not_reviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "review_status": "draft",
+      "blocking_issues_ko": [
+        "정책표 승인 필요: 경계 시각의 원천 정밀도, 사용자 입력 범위, 후보 구간 산출과 공통 결과 정의. 실제 절기값이나 정확한 사주 결과를 이 초안에서 생성하지 않았습니다.",
+        "적용 조건과 feature 계약 검수 필요",
+        "원고와 캐릭터 변환 시 의미 보존 검수 필요"
+      ],
+      "approval_note_ko": "검수 기록을 임의로 채우지 않았습니다. 승인 전에는 배포본에 포함하지 않습니다."
+    },
+    {
+      "entry_id": "D_USER_CORRECTS_INTERPRETATION",
+      "revision": 1,
+      "domain_status": "not_reviewed",
+      "content_status": "not_reviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "review_status": "draft",
+      "blocking_issues_ko": [
+        "원고 문장은 이 답변에서 작성한 예시입니다. 실제 적용 근거는 해석에 대한 사용자 수정 발화여야 합니다. 정책표 승인 필요: 사용자 피드백, 계산 불변성, 기억 수정 기준.",
+        "적용 조건과 feature 계약 검수 필요",
+        "원고와 캐릭터 변환 시 의미 보존 검수 필요"
+      ],
+      "approval_note_ko": "검수 기록을 임의로 채우지 않았습니다. 승인 전에는 배포본에 포함하지 않습니다."
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-01",
+      "topic": "입력 역법",
+      "recommended_option": "solar와 korean_lunar를 명시적으로 구분하고, 사용자 원본 날짜와 달력 선택을 보존한다.",
+      "alternatives_or_decision": "해외 음력 등 다른 달력을 지원할지는 별도 결정한다.",
+      "uncertainty_handling": "달력 종류가 불명확하면 재입력 또는 미확정 상태로 처리한다.",
+      "status": "proposed",
+      "approved_by": null
+    },
+    {
+      "policy_id": "POL-02",
+      "topic": "지원 기간과 출생 지역",
+      "recommended_option": "원천 확보 및 검증을 마친 날짜·지역 범위를 release별로 명시한다. 한국 출생 우선의 작은 범위부터 검증한다.",
+      "alternatives_or_decision": "1900~2050은 수집 목표 후보이며 확인된 지원범위가 아니다. 해외와 역사적 출생의 정식 지원 범위를 결정한다.",
+      "uncertainty_handling": "미검증 범위는 UNSUPPORTED_DATE_RANGE 또는 미지원 지역으로 안내하며 다른 시간대로 대체하지 않는다.",
+      "status": "decision_required",
+      "approved_by": null
+    },
+    {
+      "policy_id": "POL-03",
+      "topic": "음력 윤달 여부",
+      "recommended_option": "음력 입력에는 윤달 여부를 별도 필드로 두고 실제 해당 연도의 윤달 유효성을 검증한다.",
+      "alternatives_or_decision": "윤달을 모를 때 재질문할지 가능한 날짜 후보를 제시할지 UX에서 결정한다.",
+      "uncertainty_handling": "모름을 false로 치환하지 않는다. 존재하지 않는 윤달 입력은 오류로 반환한다.",
+      "status": "proposed",
+      "approved_by": null
+    },
+    {
+      "policy_id": "POL-04",
+      "topic": "연주 전환 기준",
+      "recommended_option": "검증된 입춘 사건의 실제 시각을 출생 instant와 비교하는 정책을 기본 후보로 둔다.",
+      "alternatives_or_decision": "채택 관례와 경계 포함 규칙을 계산 검수자가 승인한다. 음력 설 기준 세차를 사주 연주에 그대로 복사하지 않는다.",
+      "uncertainty_handling": "출생 가능 구간과 입춘 시각의 불확실 구간이 겹치면 두 후보 또는 미확정 특징을 표시한다.",
+      "status": "proposed",
+      "approved_by": null
+    },
+    {
+      "policy_id": "POL-05",
+      "topic": "월주 전환 기준",
+      "recommended_option": "인월부터의 12개 절입을 월 경계로 사용하는 정책을 기본 후보로 둔다.",
+      "alternatives_or_decision": "절기 코드와 월 인덱스 매핑, 해당 간지년 연간 사용 규칙을 승인한다. 음력 초하루 또는 24개 절기 전체를 월 경계로 쓰지 않는다.",
+      "uncertainty_handling": "필요한 경계 시각이 없으면 날짜만으로 월주를 확정하지 않는다.",
+      "status": "proposed",
+      "approved_by": null
+    },
+    {
+      "policy_id": "POL-06",
+      "topic": "일주 날짜 경계",
+      "recommended_option": "MVP에서는 명시적으로 승인한 일경계 정책 한 종류만 사용한다.",
+      "alternatives_or_decision": "00시 경계, 23시 경계, 야자시 분리 등 중 어떤 관례를 사용할지 결정해야 한다.",
+      "uncertainty_handling": "정책 미승인 상태에서는 실제 운영 결과를 생성하지 않고 검증용 후보만 만든다.",
+      "status": "decision_required",
+      "approved_by": null
+    },
+    {
+      "policy_id": "POL-07",
+      "topic": "시주와 23시대 일간 연결",
+      "recommended_option": "2시간 시지 구간과 시주 천간 산식에 사용할 일간 날짜를 각각 명시한다.",
+      "alternatives_or_decision": "23시대에 당일 또는 다음날 일간 중 어느 것을 사용하는지 일경계 정책과 함께 검수한다. 라이브러리 sect 값의 의미를 추측하지 않는다.",
+      "uncertainty_handling": "시각 또는 일간 기준이 불명확하면 해당 시주를 미확정 후보로 처리한다.",
+      "status": "decision_required",
+      "approved_by": null
+    },
+    {
+      "policy_id": "POL-08",
+      "topic": "실제 출생 instant 정규화",
+      "recommended_option": "출생지 IANA zone과 당시 offset·DST로 실제 UTC instant를 복원하고 사용한 tzdb 버전을 저장한다.",
+      "alternatives_or_decision": "도시→zone 매핑 자료와 사용 버전을 선택한다. 현재 위치나 모든 날짜의 UTC+9를 대신 사용하지 않는다.",
+      "uncertainty_handling": "DST gap은 재입력, fold는 추가 선택 또는 복수 후보로 처리한다.",
+      "status": "proposed",
+      "approved_by": null
+    },
+    {
+      "policy_id": "POL-09",
+      "topic": "일·시주용 시각 보정",
+      "recommended_option": "실제 UTC instant와 별개로 일·시주 계산에 쓸 시각을 도출하고 보정값을 trace에 기록한다.",
+      "alternatives_or_decision": "법정시, DST를 제외한 표준시, 경도보정시, 진태양시 중 기본 정책을 결정한다. 한국 출생에 일률적으로 30분을 빼는 방식은 진태양시 정책으로 간주하지 않는다.",
+      "uncertainty_handling": "필수 위치·보정자료가 없으면 해당 보정 정책은 지원하지 않는다. 연·월 경계 비교의 실제 instant를 재보정하지 않는다.",
+      "status": "decision_required",
+      "approved_by": null
+    },
+    {
+      "policy_id": "POL-10",
+      "topic": "시간 미상과 입력 정밀도",
+      "recommended_option": "unknown·approximate·hour·minute 등 입력 정밀도를 보존하고 가능한 시간 구간으로 계산한다.",
+      "alternatives_or_decision": "대략적 시각의 허용 구간과 사용자 표시 방식은 별도로 결정한다.",
+      "uncertainty_handling": "정오 등 임의 시각을 실제 출생시각으로 채우지 않는다. 모든 후보에서 공통인 특징만 확정 해석에 사용한다.",
+      "status": "proposed",
+      "approved_by": null
+    },
+    {
+      "policy_id": "POL-11",
+      "topic": "원천 정밀도와 데이터 release",
+      "recommended_option": "원문 표시 시각·시간대·정밀도·반올림 규칙·취득 snapshot을 보존하고 검증된 자료 묶음만 release로 활성화한다.",
+      "alternatives_or_decision": "원천의 반올림 규칙을 확인하지 못하면 미확인으로 기록하며 분 단위 값을 초 단위 정답으로 승격하지 않는다.",
+      "uncertainty_handling": "누락·오류·정밀도 경계가 있는 release는 지원범위를 축소하거나 해당 계산을 부분 결과로 제한한다.",
+      "status": "proposed",
+      "approved_by": null
+    },
+    {
+      "policy_id": "POL-12",
+      "topic": "규칙·콘텐츠 승인과 재현성",
+      "recommended_option": "계산 규칙 승인과 해석 원고 승인을 분리하고 차트·리딩에 실제 사용한 불변 revision ID를 기록한다.",
+      "alternatives_or_decision": "계산 검수, 내용 근거 검수, 편집 검수의 역할과 공개 승인 절차를 정한다. 원고 수정이 기존 차트나 과거 리딩을 덮어쓰지 않게 한다.",
+      "uncertainty_handling": "승인되지 않은 규칙·원고는 운영 응답에서 제외한다. 불변은 조용한 수정 방지를 뜻하며 사용자 데이터 삭제를 금지하는 뜻이 아니다.",
+      "status": "proposed",
+      "approved_by": null
+    }
+  ],
+  "evaluation_cases": [
+    {
+      "case_id": "EV-01",
+      "category": "양음력 변환",
+      "input_plan": "지원 release에서 독립 원천이 확보된 일반 날짜와 윤달 날짜를 선택하고 양력→음력→양력을 왕복한다.",
+      "expected_behavior": "원래 날짜·윤달 여부가 복원되고 원천과 변환 결과가 일치해야 한다. 같은 엔진이 만든 기대값을 독립 정답으로 취급하지 않는다.",
+      "reference_needed": "검증된 KASI 원천 snapshot 및 고정 변환 정책",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-02",
+      "category": "윤달 모름·오류",
+      "input_plan": "평달/윤달의 날짜가 겹치는 사례, 윤달 여부 미입력, 존재하지 않는 윤달 입력을 준비한다.",
+      "expected_behavior": "평달과 윤달이 구분되며 모름을 false로 바꾸지 않는다. 없는 윤달은 검증 오류, 모름은 추가 질문 또는 가능한 후보로 처리한다.",
+      "reference_needed": "해당 연도의 검증된 한국 음력 달력 및 UX 정책",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-03",
+      "category": "잘못된 날짜·미지원 범위",
+      "input_plan": "2월 30일 같은 무효 날짜와 release 지원범위 밖 입력을 준비한다.",
+      "expected_behavior": "잘못된 입력과 미지원 범위를 구분해 반환하고 이전 요청의 성공 결과나 임의 보정 결과를 재사용하지 않는다.",
+      "reference_needed": "입력 스키마 및 release coverage manifest",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-04",
+      "category": "입춘 경계·원천 정밀도",
+      "input_plan": "검증된 입춘 시각의 전·경계·후 입력과 원천 정밀도 구간에 겹치는 입력을 만든다.",
+      "expected_behavior": "승인된 연주 정책의 경계에서만 후보가 바뀌며 분 단위 원천을 초 단위 확정값으로 처리하지 않는다. 겹치는 구간은 불확실성을 반환한다.",
+      "reference_needed": "공식 절기 시각 원천, 정밀도·반올림 정보, 승인된 연주 정책",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-05",
+      "category": "월주 절입 경계",
+      "input_plan": "12개 절입 각각의 전·후와 월을 바꾸지 않는 나머지 절기 부근 입력을 준비한다.",
+      "expected_behavior": "승인된 12개 경계에서만 월주 전환이 발생하며 음력 초하루나 모든 24절기를 월 경계로 사용하지 않는다.",
+      "reference_needed": "검증된 절기 release와 절기→월 인덱스·오호둔 승인 규칙",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-06",
+      "category": "23시·자정·01시",
+      "input_plan": "22:59, 23:00, 23:59, 00:00, 00:59, 01:00 입력을 동일한 승인 정책으로 비교한다.",
+      "expected_behavior": "일주 날짜와 시주 천간에 사용하는 일간이 정책명세에 맞아야 한다. 라이브러리의 기본값 차이는 정책 차이와 구현 오류로 나눠 기록한다.",
+      "reference_needed": "독립 검수자가 승인한 일경계·23시대 시주 규칙",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-07",
+      "category": "한국 역사적 시간대",
+      "input_plan": "1954/1961 표준시 변경 및 1987/1988 DST 관련 입력을 고정 IANA 자료에서 선정한다.",
+      "expected_behavior": "당시 offset과 DST가 실제 instant에 반영되어야 하며 현재 UTC+9를 모든 입력에 고정하지 않는다. 지원하지 않는 기간은 명시적으로 거절한다.",
+      "reference_needed": "고정 tzdb Asia/Seoul 원천 및 정규화 fixture",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-08",
+      "category": "DST 존재하지 않는 시각",
+      "input_plan": "지원 대상 시간대의 DST 시작에 해당하는 gap 입력을 독립 tzdb 원천에서 선택한다.",
+      "expected_behavior": "존재하지 않는 현지시각을 재입력 대상으로 표시하고 라이브러리가 임의로 다른 시각으로 이동시킨 결과를 확정하지 않는다.",
+      "reference_needed": "고정 tzdb 및 입력 검증 정책",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-09",
+      "category": "DST 중복 시각",
+      "input_plan": "지원 대상 시간대의 DST 종료에 해당하는 fold 입력을 선택한다.",
+      "expected_behavior": "두 실제 instant 후보를 보존하거나 사용자의 추가 선택을 요청한다. 선택이 없는 상태에서 첫 후보를 조용히 확정하지 않는다.",
+      "reference_needed": "고정 tzdb 및 fold 처리 정책",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-10",
+      "category": "시간 미상 일반일",
+      "input_plan": "가능 시간 구간에 입춘·절입이 없는 날의 시간 미상 입력을 준비한다.",
+      "expected_behavior": "시각을 정오로 채우지 않는다. 승인된 일경계까지 고려해 모든 후보에 공통인 특징만 확정하고 알 수 없는 시주 해석을 제외한다.",
+      "reference_needed": "승인된 일경계와 구간 계산 정책",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-11",
+      "category": "시간 미상 경계일",
+      "input_plan": "입춘일·절입일 또는 일경계가 가능한 출생 구간 안에 있는 시간 미상 입력을 준비한다.",
+      "expected_behavior": "필요한 경우 연·월·일주도 복수 후보로 반환한다. 후보별 차이를 표시하고 근거 없는 확률을 부여하지 않는다.",
+      "reference_needed": "검증된 절기 시각 및 구간·경계 정책",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-12",
+      "category": "원천 수집 실패",
+      "input_plan": "HTTP 성공/본문 오류, 필수 필드 누락, checksum 불일치, 절기 누락, 부분 수집을 가정한 fixture를 만든다.",
+      "expected_behavior": "원문 snapshot은 실패 상태를 남기되 검증 완료 release로 활성화하지 않는다. 런타임에는 누락을 알리고 임의의 날짜나 시각을 채우지 않는다.",
+      "reference_needed": "공식 API 결과코드 명세, 파서 스키마 및 release 승인 기준",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-13",
+      "category": "버전 변경·재현성",
+      "input_plan": "동일 입력을 고정 release로 반복 계산하고, 데이터·규칙·원고 revision을 각각 한 종류씩 바꿔 비교한다.",
+      "expected_behavior": "고정 입력·계산 버전에서 차트 JSON이 일치하며 새 revision은 새 결과로 저장한다. 원고 수정만으로 과거 차트나 저장된 리딩을 덮어쓰지 않는다.",
+      "reference_needed": "독립 승인 fixture, 버전 manifest 및 차이 검토 기준",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-14",
+      "category": "조건 unknown·해석 근거",
+      "input_plan": "필요 feature가 unknown·미지원·미확정인 원고 조건과 확정 feature에 맞지 않는 원고를 준비한다.",
+      "expected_behavior": "unknown을 0이나 false로 치환해 조건을 만족시키지 않는다. 승인되지 않거나 증거가 없는 해석을 선택하지 않으며 검수된 일반 질문으로 대체한다.",
+      "reference_needed": "조건 DSL의 3값 논리, feature 스키마, 콘텐츠 승인 release",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-15",
+      "category": "소유권·기억 동의",
+      "input_plan": "서로 다른 테스트 사용자의 차트·대화 접근과 기억 저장 미동의, 캐릭터 재설정 상황을 준비한다.",
+      "expected_behavior": "다른 사용자의 데이터 접근이 거부되고 동의 없는 발화를 영구 기억으로 승격하지 않는다. 공용 캐릭터 설정과 사용자별 기억이 혼합되지 않는다.",
+      "reference_needed": "소유권 모델, 동의 정책 및 user_partner 연결 규칙",
+      "case_status": "planned"
+    },
+    {
+      "case_id": "EV-16",
+      "category": "삭제·근거 추적",
+      "input_plan": "원본 메시지 삭제, 기억 삭제, 출생 프로필 및 계정 삭제의 테스트 시나리오를 준비한다.",
+      "expected_behavior": "정의된 범위의 원본·개인 차트·해석·파생 기억·요약·캐시가 삭제 또는 무효화되며 다시 응답 근거로 사용되지 않는다. 공용 원천과 다른 사용자 기록은 유지된다.",
+      "reference_needed": "데이터 보존·삭제 명세 및 근거 lineage 지도",
+      "case_status": "planned"
+    }
+  ],
+  "table_groups": [
+    {
+      "group_id": "TG-01",
+      "area": "reference",
+      "tables": [
+        "source_registry",
+        "source_snapshot",
+        "dataset_release"
+      ],
+      "purpose": "출처, 실제 취득 원문, 검증·공개된 자료 묶음을 분리한다.",
+      "key_design": "source_snapshot은 source_id와 원문 checksum·취득일·parser_version을 참조한다. dataset_release는 승인된 snapshot 목록과 coverage를 고정한다.",
+      "review_gate": "이용조건 검토, 수집 무결성 검토, 자료 내용 검증, release 활성화 승인을 별도 상태로 둔다.",
+      "minimal_implementation": "원문은 보관 경로와 checksum으로 연결하며 snapshot 목록을 release manifest JSON으로 관리하는 방식도 가능하다. 비밀키는 원문 요청 로그에서 제거한다.",
+      "implementation_status": "proposed_not_created"
+    },
+    {
+      "group_id": "TG-02",
+      "area": "reference",
+      "tables": [
+        "calendar_day"
+      ],
+      "purpose": "날짜별 한국 양음력·윤달·일진 원천을 검색한다.",
+      "key_design": "PRIMARY KEY(dataset_release_id, solar_date). UNIQUE(dataset_release_id, lunar_year, lunar_month, lunar_day, is_leap_month). source_snapshot_id로 원문을 추적한다.",
+      "review_gate": "지원범위 누락 검사, 입력 유효성, 독립 원천 대조 및 양음력 왕복 검증 후 공개한다.",
+      "minimal_implementation": "date 단독 PK를 사용하지 않는다. API 월간지를 사주 절입 월주로 자동 승격하지 않는다.",
+      "implementation_status": "proposed_not_created"
+    },
+    {
+      "group_id": "TG-03",
+      "area": "reference",
+      "tables": [
+        "solar_term"
+      ],
+      "purpose": "절기 사건의 실제 시각과 원천 정밀도를 보관한다.",
+      "key_design": "PRIMARY KEY(dataset_release_id, event_year, term_code). event_year의 원천 지역 기준을 명시하고 source_snapshot_id를 기록한다.",
+      "review_gate": "날짜뿐 아니라 시각·시간대·정밀도·반올림 여부와 필요한 앞뒤 경계의 확보를 확인한다.",
+      "minimal_implementation": "instant_utc, original_local_time, original_zone, precision, rounding_policy, uncertainty interval 또는 그 도출 규칙을 보관한다.",
+      "implementation_status": "proposed_not_created"
+    },
+    {
+      "group_id": "TG-04",
+      "area": "reference",
+      "tables": [
+        "rule_set",
+        "reference_rule"
+      ],
+      "purpose": "계산 관례와 간지·오행·십성 등 승인된 매핑 규칙을 버전으로 고정한다.",
+      "key_design": "불변 rule_set_id에 policy_json, engine_code_sha, reference_rule manifest, approval state를 연결한다.",
+      "review_gate": "계산 정책 승인과 기준 기대값 검증을 원고 편집 승인과 분리한다.",
+      "minimal_implementation": "reference_rule은 검증된 seed JSON/CSV로 시작할 수 있다. 가중 오행·용신·강약·대운 등 미승인 규칙은 포함하지 않는다.",
+      "implementation_status": "proposed_not_created"
+    },
+    {
+      "group_id": "TG-05",
+      "area": "content",
+      "tables": [
+        "knowledge_revision",
+        "content_release"
+      ],
+      "purpose": "조건과 근거가 있는 자체 작성 해석 원고를 검수해 공개한다.",
+      "key_design": "entry_id와 revision을 구분하며 content_release에는 실제 사용 가능한 knowledge_revision_id 목록을 고정한다.",
+      "review_gate": "초안, 내용 근거 검토, 편집 검토, 제품 공개 승인 상태를 구분한다. 출처 및 권리 확인이 끝나지 않은 원고는 운영에서 제외한다.",
+      "minimal_implementation": "조건 JSON은 허용된 DSL만 사용한다. 미상 조건은 자동으로 참이 되지 않는다. 사주 특징 해석을 사용자 사실 저장소에 복사하지 않는다.",
+      "implementation_status": "proposed_not_created"
+    },
+    {
+      "group_id": "TG-06",
+      "area": "content",
+      "tables": [
+        "character_revision"
+      ],
+      "purpose": "공용 캐릭터의 말투·호칭·허구 배경을 해석 원문과 분리한다.",
+      "key_design": "character_id와 persona_revision을 구분하며 대화와 리딩에 실제 적용한 revision을 남긴다.",
+      "review_gate": "캐릭터 표현과 사실·운세 근거 보존 여부를 검토한다.",
+      "minimal_implementation": "지아·루나·소울 같은 표시 이름을 식별키로 쓰지 않는다. 캐릭터 수만큼 계산 규칙이나 명리 원고를 중복 생산하지 않는다.",
+      "implementation_status": "proposed_not_created"
+    },
+    {
+      "group_id": "TG-07",
+      "area": "app",
+      "tables": [
+        "birth_profile_revision",
+        "chart_snapshot"
+      ],
+      "purpose": "사용자 출생 원본과 해당 입력 revision으로 계산한 결과를 연결한다.",
+      "key_design": "owner_id 및 birth_profile_revision_id를 사용한다. chart_snapshot은 dataset_release_id, rule_set_id, code_sha, tzdb_version을 고정한다.",
+      "review_gate": "입력 검증, 소유권 검사, 정규화 trace, 미상·후보 표현, 삭제 경로를 확인한다.",
+      "minimal_implementation": "normalized_candidates와 features는 스키마 검증된 JSONB로 시작할 수 있다. 개인정보는 공용 데이터 release에 넣지 않으며 수정은 새 revision, 삭제는 별도 수명주기로 처리한다.",
+      "implementation_status": "proposed_not_created"
+    },
+    {
+      "group_id": "TG-08",
+      "area": "app",
+      "tables": [
+        "reading_snapshot"
+      ],
+      "purpose": "계산 결과와 실제 사용 원고·캐릭터·모델·출력의 근거를 보관한다.",
+      "key_design": "chart_snapshot_id, content_release_id, cited_knowledge_revision_ids, character_revision_id, prompt_version, model metadata를 기록한다.",
+      "review_gate": "출력의 feature와 원고 인용이 실제 입력 근거에 존재하는지 검사하고 실패 시 검수 template을 사용한다.",
+      "minimal_implementation": "기존 출력 재표시와 새 생성은 구별한다. LLM 새 문장의 완전한 결정론을 약속하지 않는다. 개인화한 출력은 사용자 간 공용 캐시로 공유하지 않는다.",
+      "implementation_status": "proposed_not_created"
+    },
+    {
+      "group_id": "TG-09",
+      "area": "app",
+      "tables": [
+        "user_partner",
+        "conversation",
+        "message",
+        "memory_fact",
+        "consent_record"
+      ],
+      "purpose": "사용자별 파트너 관계, 대화 및 동의한 기억을 관리한다.",
+      "key_design": "owner_id와 user_partner_id를 기준으로 분리하며 memory_fact는 source_message_id와 consent/state·expiry를 추적한다.",
+      "review_gate": "기억 출처·동의·수정·삭제와 다른 사용자 데이터 접근 거부를 검증한다.",
+      "minimal_implementation": "사주 계산 데모 이후 대화 통합에서 구현한다. 공용 캐릭터 허구 설정, 사용자가 말한 사실, 사주 해석 추정을 서로 다른 자료로 취급한다.",
+      "implementation_status": "proposed_not_created"
+    },
+    {
+      "group_id": "TG-10",
+      "area": "evaluation",
+      "tables": [
+        "evaluation_case",
+        "evaluation_run"
+      ],
+      "purpose": "독립 근거가 있는 기대값과 실제 실행 결과를 분리해 기록한다.",
+      "key_design": "case_id 및 fixture_revision에 reference revision과 승인 상태를 붙이고 실행별 code/data/policy manifest를 고정한다.",
+      "review_gate": "예상 사례, 독립 원천 확인 사례, 정책 승인 사례, 실행 통과 사례를 구분한다.",
+      "minimal_implementation": "처음에는 Git의 JSON/CSV fixture 및 테스트 리포트로 충분하다. 계획한 케이스 수를 실행 통과 수로 집계하지 않는다.",
+      "implementation_status": "proposed_not_created"
+    }
+  ],
+  "production_plan": [
+    {
+      "local_date": "2026-10-20",
+      "timezone": "Asia/Seoul",
+      "owner_role": "백엔드 설계 담당·제품 기획 담당·계산 검수 담당",
+      "goal": "현재 확보된 자료와 승인되지 않은 계산 정책을 정리한다.",
+      "deliverables": [
+        "지원범위 후보와 미지원 처리표",
+        "정책 결정표",
+        "DB 자료목록 및 키 설계",
+        "출처대장 초안"
+      ],
+      "completion_criteria": "18~19일 계획을 완료된 사실로 간주하지 않고 실제 확보/미확보 상태를 표시한다. 각 결정필요 항목의 역할 담당을 정한다.",
+      "fallback_if_blocked": "미승인 정책은 후보 상태로 두고 입력·원천자료 템플릿 작업을 진행한다.",
+      "status": "proposed"
+    },
+    {
+      "local_date": "2026-10-21",
+      "timezone": "Asia/Seoul",
+      "owner_role": "원천 수집 담당·백엔드 담당·자료 검수 담당",
+      "goal": "실제로 취득한 원천과 정규화 샘플을 연결한다.",
+      "deliverables": [
+        "원문 snapshot 및 checksum",
+        "calendar_day·solar_term 샘플",
+        "취득/파서 이력",
+        "기간·필드·정밀도 누락표"
+      ],
+      "completion_criteria": "샘플마다 원문으로 역추적할 수 있고 공개상세 확인과 인증 API 검증의 차이를 기록한다. source→snapshot→release 구조를 확인한다.",
+      "fallback_if_blocked": "공식 API 시각·과거 범위가 미확인되면 해당 행을 미검증으로 유지하고 지원범위를 확대하지 않는다.",
+      "status": "proposed"
+    },
+    {
+      "local_date": "2026-10-22",
+      "timezone": "Asia/Seoul",
+      "owner_role": "백엔드 담당·계산 검수 담당",
+      "goal": "입력→정규화→계산 JSON→근거 trace의 한 흐름을 만든다.",
+      "deliverables": [
+        "입력 검증과 미상 표현",
+        "승인 정책 범위의 계산 데모",
+        "차트 snapshot 계약",
+        "데이터·규칙 버전 manifest"
+      ],
+      "completion_criteria": "계산에 사용한 원천과 정책 ID가 결과에 기록되며 사용자 입력을 임의 보정하지 않는다.",
+      "fallback_if_blocked": "검증된 샘플 및 정책 범위의 데모로 제한하며 상용 API 완료로 표시하지 않는다.",
+      "status": "proposed"
+    },
+    {
+      "local_date": "2026-10-23",
+      "timezone": "Asia/Seoul",
+      "owner_role": "콘텐츠 작성 담당·명리 내용 검수 담당·편집 담당·백엔드 담당",
+      "goal": "짧은 자체 해석 원고와 계산 feature 조건을 연결한다.",
+      "deliverables": [
+        "검수 가능한 해석 초안과 조건표",
+        "원고 근거·편집 승인 상태",
+        "content release 후보",
+        "미상 조건 및 일반 질문 fallback"
+      ],
+      "completion_criteria": "초안 수와 공개 승인 수를 분리 집계하고 없는 feature에 대한 해석을 선택하지 않는다. 캐릭터 말투와 해석 근거를 분리한다.",
+      "fallback_if_blocked": "승인된 소수 원고와 검수 template만 데모에 사용하고 나머지는 draft로 둔다.",
+      "status": "proposed"
+    },
+    {
+      "local_date": "2026-10-24",
+      "timezone": "Asia/Seoul",
+      "owner_role": "QA 담당·계산 검수 담당·백엔드 담당·콘텐츠 검수 담당",
+      "goal": "중요 경계와 근거 일치, 원천 실패 및 삭제 영향을 검증한다.",
+      "deliverables": [
+        "독립 기대값을 가진 fixture 목록",
+        "실행 결과와 실패 원인표",
+        "버전 변경 전후 차이",
+        "권한·동의·삭제 검증 범위",
+        "알려진 미지원 목록"
+      ],
+      "completion_criteria": "계획·독립 원천 확인·정책 승인·실행 통과를 구분한다. 미실행 항목을 통과로 표시하지 않는다.",
+      "fallback_if_blocked": "실패한 범위는 공개 범위에서 제외하고 검증 가능한 부분만 완료 대상으로 유지한다.",
+      "status": "proposed"
+    },
+    {
+      "local_date": "2026-10-25",
+      "timezone": "Asia/Seoul",
+      "owner_role": "제품 기획 담당·백엔드 담당·검수 담당",
+      "goal": "검토 가능한 DB 자료 패키지와 제한 범위 데모를 정리한다.",
+      "deliverables": [
+        "정책명세",
+        "자료사전·키 설계",
+        "출처대장·release manifest",
+        "seed 자료와 원고 입력본",
+        "검증 보고서",
+        "데모 및 남은 작업 목록"
+      ],
+      "completion_criteria": "실제 연결·수집·검증 완료 범위를 증거로 표시한다. 앱 전체 상용 출시와 사주 DB 설계·연동 데모의 완료 조건을 분리한다.",
+      "fallback_if_blocked": "원천 검증 또는 연결이 미완료면 설계·샘플·진행 보고로 정확히 인계하며 production-ready로 표현하지 않는다.",
+      "status": "proposed"
+    }
+  ],
+  "authoring_notes": [
+    {
+      "note_id": "TEXT_ORIGIN",
+      "note_ko": "원고 문장은 이 작업에서 새로 작성한 예시이며 외부 운세 서비스·영상·책의 문장을 복제하지 않았습니다. 문장의 자체 작성 경위는 명리 관례나 계산 규칙의 근거 승인을 대신하지 않습니다."
+    },
+    {
+      "note_id": "INPUT_REPORT",
+      "note_ko": "구조 참고: 사용자가 제공한 사주 백엔드 연구 문서의 계산·해석·관계 계층 분리와 입력/원천/정책 불확실성 구분. 이 입력 보고서를 실제 계산 정책이나 원천 검증 완료 기록으로 취급하지 않았습니다."
+    },
+    {
+      "note_id": "MISSING_BASIS",
+      "note_ko": "실제 승인 근거가 없는 basis_source_id와 definition_source_id는 null로 두었습니다. 정책표 승인 필요 항목을 검수하고 실존하는 근거 ID를 연결하기 전에는 publishable을 true로 바꾸지 않습니다."
+    },
+    {
+      "note_id": "DSL",
+      "note_ko": "최소 조건 DSL은 이 파일에서 all, eq, in만 사용합니다. 계산 후보 관련 조건은 모든 유효 후보에서 참일 때만 선택합니다. 후보가 0개이거나 평가 정보가 불충분하면 unknown으로 처리하며 공집합을 모두 참으로 처리하지 않습니다. 코드·SQL·임의 경로를 조건 문자열로 실행하지 않습니다."
+    },
+    {
+      "note_id": "TRADITION",
+      "note_ko": "실제 명리 의미를 검증하지 않았으므로 traditional_convention 유형의 원고는 만들지 않았습니다. 이 파일의 8개 초안은 계산 결과 설명·제품 안내·발화 근거가 필요한 대화 원고입니다."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+# Local credentials and private user records
+.env
+.env.*
+!.env.example
+*secret*
+credentials/
+private/
+users/
+*.key
+*.pem
+
+# Licensed/raw upstream data and generated databases — do not commit until rights are reviewed
+data/raw/
+data/downloads/
+data/generated/
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+*.bsp
+
+# Python/Node caches
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+dist/
+build/
+.pytest_cache/
+.coverage
+.DS_Store
