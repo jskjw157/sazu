@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools==82.0.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sazu-foundation"
+version = "0.1.0"
+description = "Offline Korean calendar, timezone and solar-term research foundation"
+requires-python = ">=3.13,<3.14"
+dependencies = ["korean-lunar-calendar==0.3.1", "tzdata==2026.2", "python-dateutil==2.9.0.post0"]
+
+[project.optional-dependencies]
+astronomy = ["skyfield==1.55", "jplephem==2.24", "sgp4==2.27", "numpy==2.3.5", "certifi==2026.5.20"]
+
+[project.scripts]
+sazu = "sazu.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["F", "E9"]

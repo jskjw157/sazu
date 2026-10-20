@@ -1,0 +1,5 @@
+# Exact version pins; not an artifact-hash lock. See IMPLEMENTATION.md.
+korean-lunar-calendar==0.3.1
+tzdata==2026.2
+python-dateutil==2.9.0.post0
+six==1.17.0

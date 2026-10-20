@@ -31,3 +31,11 @@ build/
 .pytest_cache/
 .coverage
 .DS_Store
+
+# Local implementation work and verification scratch space
+.evidence/
+.superpowers/
+.worktrees/
+*.egg-info/
+.ruff_cache/
+.mypy_cache/
