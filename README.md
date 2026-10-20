@@ -1,39 +1,46 @@
-# sazu — 사주 원천 데이터 및 DB 구축 자료
+# sazu — 자체 계산 기반 사주·AI 연애 앱
 
-한국어 AI 연애·운세 모바일 웹 앱을 위한 **사주 역법 데이터, 계산 규칙, 해석 콘텐츠, 검증 방법**을 정리한 연구·설계 저장소입니다.
+**상용 사주·만세력·궁합·운세 API를 사용하지 않습니다.** 공식 원천과 오픈소스를 역할별로 활용하고 개발공수보다 재현성과 검증을 우선합니다.
 
-> **상태: 조사·설계 / 검증 표본 보관.** 이 저장소의 예시는 상용 계산 엔진이나 공식 데이터셋의 전체 적재·승인을 의미하지 않습니다. 운세 해석의 과학적 예측력을 증명하지 않습니다.
+> 현재 상태: **S1 연구·검증용 Python 패키지와 CLI 구현**. 사주 원국 엔진, 운영 DB, 모바일 앱, 상용 출시 승인은 아직 완료되지 않았습니다. 모든 CLI 성공 응답에도 `production_authorized=false`를 표시합니다.
 
-## 자료 목록
+## 구현과 검증
+
+한국 음양력·윤달 후보 변환, 고정 tzdata 기반 시각 정규화, 절기 레코드·로컬 천문 계산 어댑터, 원천 파일 무결성/명시적 수집, 후보 데이터 검증을 제공합니다.
+
+- [현재 구현 범위·설치·제한 사항](IMPLEMENTATION.md)
+- [최종 실행 검증 기록](docs/implementation/verification-20261021.json)
+- [파일별 구현 계획](docs/superpowers/plans/2026-10-21-foundation-implementation.md)
+- [Python 소스](src/sazu), [테스트](tests), [CI 정의](.github/workflows/foundation.yml)
+
+로컬 최종 회귀시험은 **174 passed, 1 skipped**입니다. **1920~2050년 전체 47,848일**의 양음력 왕복은 불일치가 없었으나, 같은 라이브러리의 내부 일관성 검증입니다. KASI 독립 전수 대조나 운세 예측력 검증이 아닙니다. 천문 숫자 계산의 로컬 통합 시험은 kernel/패키지 부재로 미실행이며, 원격 CI 결과는 PR에서 따로 확인해야 합니다.
+
+```bash
+python -m pip install -r requirements-dev.lock
+python -m pip install --no-deps --no-build-isolation -e .
+python -m pytest -q
+printf '%s' '{"kind":"korean_lunar","year":2017,"month":5,"day":1,"leap":"unknown"}' | python -m sazu calendar
+```
+
+Python 3.13.5의 별도 가상환경을 권장합니다. 실제 실행한 의존성 버전, 정확한 명령과 남은 검증은 IMPLEMENTATION.md를 확인하세요.
+
+## 설계 기준
+
+[ADR-0001](docs/decisions/0001-no-commercial-fortune-api.md) · [S1 설계](docs/superpowers/specs/2026-10-21-self-hosted-foundation-design.md) · [품질 로드맵](docs/QUALITY_ROADMAP.md) · [개발 지침](AGENTS.md)
+
+`공식 원천 → 정규화 → 검증된 배포본 → 결정론 계산 규칙 → 승인된 해석 → 캐릭터 표현`이 전체 목표입니다. 현재 S1 코드가 이 전체 흐름을 완성한 것은 아닙니다. 승인된 배포본 활성화가 없으므로 운영 사용은 차단합니다. 입력 미상·정밀도 부족·자료 누락을 임의 값이나 상용 API로 보완하지 않습니다.
+
+## 보존된 조사·작업 자료
 
 | 경로 | 내용 |
 |---|---|
-| [docs/architecture/saju_db_blueprint.md](docs/architecture/saju_db_blueprint.md) | PostgreSQL DB 구조·콘텐츠 원고·조건사전·검증 계획 |
-| [docs/research/saju_backend_research_20261018.md](docs/research/saju_backend_research_20261018.md) | 초기 사주 계산·DB 백엔드 설계 조사(원본) |
-| [docs/research/saju_source_commercial_research_20261020.md](docs/research/saju_source_commercial_research_20261020.md) | KASI·오픈소스·상용 API 비교와 도입 기준 |
-| [data/verification/saju_source_verification_20261020.json](data/verification/saju_source_verification_20261020.json) | 제한된 실행 검증·경계 사례·패키지 버전 기록 |
-| [data/examples/saju_db_examples.json](data/examples/saju_db_examples.json) | 출처·원고·조건·특징·정책·평가 항목의 **검수 전 예시** |
-| [planning/saju_db_workbook.xlsx](planning/saju_db_workbook.xlsx) | 7개 시트의 DB 자료 작성/검수 작업표 |
-| [docs/DATA_STATUS.md](docs/DATA_STATUS.md) | 수집/검증/상용 이용 상태와 해야 할 일 |
+| [DB 구축안](docs/architecture/saju_db_blueprint.md) | PostgreSQL 구조·콘텐츠·검수 설계 |
+| [초기 백엔드 조사](docs/research/saju_backend_research_20261018.md) | 최초 조사 원본 |
+| [원천·오픈소스·API 조사](docs/research/saju_source_commercial_research_20261020.md) | 역사 기록. 상용 API 도입 제안은 현재 범위에서 제외 |
+| [기존 계산 비교](data/verification/saju_source_verification_20261020.json) | 과거 제한된 표본·버전 기록. 이번 최종 테스트 수에 합산하지 않음 |
+| [원고·조건 예제](data/examples/saju_db_examples.json) | 검수 전 초안, 운영 데이터 아님 |
+| [엑셀 작업표](planning/saju_db_workbook.xlsx) | 기존 7개 시트. 일정·수량은 과거 제안 |
+| [데이터 현황](docs/DATA_STATUS.md) | 2026-10-20 당시 상태 |
+| [출처대장](docs/SOURCE_REGISTRY.md) | 원천·후보 목록 |
 
-## 우선 권장 아키텍처
-
-1. **달력**: KASI 공식 음양력·윤달 자료와 한국 음력 변환 라이브러리를 교차 검증
-2. **절기**: Skyfield + JPL 천문력으로 생성, KASI 공식 절기 시각과 대조
-3. **시간대**: 출생 당시 현지 시간대 및 DST는 IANA tzdb에 따라 계산
-4. **사주 원국**: 입춘·절입·일주·시주 등 **명시한 규칙 버전**으로 결정론 계산
-5. **해석**: 사람이 검수한 원고·적용 조건을 사용하며 LLM은 설명/캐릭터 표현에 한정
-
-## 중요한 경계
-
-- KASI 공식 **원본 TXT 전체**, 외부 천문력 바이너리, 대량 음양력 변환표는 **이 저장소에 포함하지 않았습니다.** 파일 확보/검증 기록은 있으나 재배포 허용범위·출처·정밀도를 추가 확인해야 합니다.
-- 예제 JSON·엑셀은 실제 프로덕션 DB나 계산 API가 아닙니다.
-- 검증 기록의 소수 표본 통과를 전체 기간 정확도나 연애/미래 예측력으로 해석하지 마세요.
-- 외부 라이브러리·데이터의 저작권, 원본 라이선스·출처표시, 상용 API 계약은 각각 별도로 확인해야 합니다.
-- 출생정보·대화·인증키·개인정보는 공개 저장소에 커밋하지 마세요.
-
-## 시작 순서
-
-[DATA_STATUS.md](docs/DATA_STATUS.md)에서 미확정 항목 확인 → [소스 비교 보고서](docs/research/saju_source_commercial_research_20261020.md) 검토 → [DB 구축안](docs/architecture/saju_db_blueprint.md)으로 구조 설계 → [작성 템플릿](planning/saju_db_workbook.xlsx)에서 정책/원고 검수 → [검증 JSON](data/verification/saju_source_verification_20261020.json) 기반 회귀시험을 추가하세요.
-
-작성 기준일: **2026-10-20**. 공개 저장소에 실데이터를 추가하기 전에는 원본의 허락범위와 사용자 데이터 포함 여부를 다시 확인하세요.
+KASI 원문 전체, JPL 바이너리, 개인정보·실제 출생기록·인증키는 포함하지 않습니다. 원천 이용권·계산 정확성·운영 승인은 별도로 검토합니다. 과거 보고서와 새 실행 결과를 구분합니다.

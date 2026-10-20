@@ -1,0 +1,6 @@
+-r requirements-core.lock
+skyfield==1.55
+jplephem==2.24
+sgp4==2.27
+numpy==2.3.5
+certifi==2026.5.20

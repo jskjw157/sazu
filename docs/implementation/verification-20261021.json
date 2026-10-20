@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-21",
+  "status": "research_foundation_not_production_approval",
+  "python": "3.13.5",
+  "dependencies": {
+    "korean-lunar-calendar": "0.3.1",
+    "tzdata": "2026.2",
+    "python-dateutil": "2.9.0.post0",
+    "six": "1.17.0",
+    "pytest": "9.0.2",
+    "setuptools": "82.0.1"
+  },
+  "pytest": {
+    "command": "python -m pytest -q --junitxml=.evidence/pytest-final.xml",
+    "exit_code": 0,
+    "collected": 175,
+    "passed": 174,
+    "skipped": 1,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 10.828
+  },
+  "calendar_round_trip": {
+    "start": "1920-01-01",
+    "end": "2050-12-31",
+    "checked_dates": 47848,
+    "status": "passed",
+    "evidence_level": "self_consistency_not_independent_official_validation",
+    "parts": [
+      {"start": "1920-01-01", "end": "1929-12-31", "checked_dates": 3653, "status": "passed"},
+      {"start": "1930-01-01", "end": "1939-12-31", "checked_dates": 3652, "status": "passed"},
+      {"start": "1940-01-01", "end": "1949-12-31", "checked_dates": 3653, "status": "passed"},
+      {"start": "1950-01-01", "end": "1959-12-31", "checked_dates": 3652, "status": "passed"},
+      {"start": "1960-01-01", "end": "1969-12-31", "checked_dates": 3653, "status": "passed"},
+      {"start": "1970-01-01", "end": "1979-12-31", "checked_dates": 3652, "status": "passed"},
+      {"start": "1980-01-01", "end": "1989-12-31", "checked_dates": 3653, "status": "passed"},
+      {"start": "1990-01-01", "end": "1999-12-31", "checked_dates": 3652, "status": "passed"},
+      {"start": "2000-01-01", "end": "2009-12-31", "checked_dates": 3653, "status": "passed"},
+      {"start": "2010-01-01", "end": "2019-12-31", "checked_dates": 3652, "status": "passed"},
+      {"start": "2020-01-01", "end": "2029-12-31", "checked_dates": 3653, "status": "passed"},
+      {"start": "2030-01-01", "end": "2039-12-31", "checked_dates": 3652, "status": "passed"},
+      {"start": "2040-01-01", "end": "2049-12-31", "checked_dates": 3653, "status": "passed"},
+      {"start": "2050-01-01", "end": "2050-12-31", "checked_dates": 365, "status": "passed"}
+    ],
+    "execution_note": "A first aggregate runner reached the tool time limit; all affected ranges were rerun in smaller batches with exit 0. Final range continuity and counts were checked."
+  },
+  "wheel_build": {
+    "status": "passed",
+    "sha256": "91e6d63b2862fcb77cd61e3e7e128993a9bd7e86d88583a2c0fc1ce1a8df6009",
+    "runs": 2,
+    "source_date_epoch": 1792531200,
+    "scope": "same-environment deterministic wheel, not a clean dependency install"
+  },
+  "wheel_import_smoke": "passed_using_existing_dependencies",
+  "compileall": "passed",
+  "production_authorized": false,
+  "not_executed": [
+    "authenticated_KASI_API",
+    "independent_official_full_range_comparison",
+    "local_JPL_Skyfield_integration",
+    "local_Ruff",
+    "static_type_checker",
+    "Hypothesis",
+    "independent_code_review",
+    "production_activation",
+    "database_migration",
+    "deployment"
+  ],
+  "ci": "workflow_defined_remote_result_must_be_read_separately",
+  "recovery_note": "Workspace reset. Eight source blobs recovered byte-for-byte; remaining files and tests reconstructed and rerun. No reliance on unretained intermediate test counts.",
+  "tdd_observations": [
+    {"command_group": "sources_solar_validation", "red_failures": 50, "reason": "missing modules", "after_implementation": "passed"},
+    {"command_group": "CLI_and_temporal_review", "red_failures": 21, "reason": "missing CLI and six input/range defects", "after_implementation": "passed"},
+    {"command_group": "source_review", "red_failures": 2, "reason": "lost unsupported-range code and unvalidated source ID", "after_implementation": "passed"},
+    {"command_group": "nonblocking_source_file", "red_failures": 1, "reason": "FIFO open lacked O_NONBLOCK before fstat", "after_implementation": "passed"}
+  ],
+  "tested_git_trees": {
+    "src": "7f305ac0d12807615d9674e53858be090f933fe2",
+    "tests": "8f48956a17af941ff706504ee4540b8d9369d1bc",
+    "tools": "1ec6d54a3af904f7980e881421eeef5d2207f11f"
+  }
+}
