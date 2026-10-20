@@ -1,4 +1,5 @@
 """Explicit term mapping and offline ephemeris adapter; not a saju rule engine."""
+from contextlib import closing
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta, timezone
 import hashlib
@@ -152,7 +153,7 @@ def generate_terms(year: int, kernel_path: Path, manifest: SourceManifest) -> tu
     high = datetime(year+1, 1, 1, tzinfo=FIXED_KST).astimezone(UTC)
     start, end = ts.from_datetime(low), ts.from_datetime(high)
     try:
-        with load_file(str(kernel_path)) as eph:
+        with closing(load_file(str(kernel_path))) as eph:
             relevant = [s for s in eph.spk.segments if s.target in (3, 10, 399)]
             require({s.target for s in relevant} >= {3, 10, 399}, 'DATA_INTEGRITY_FAILED')
             require(all(s.start_jd <= float(start.tdb) and float(end.tdb) <= s.end_jd

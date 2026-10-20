@@ -101,3 +101,38 @@ def test_event_source_identity_is_strict():
     from sazu.solar_terms import normalize_reference_record
     event=normalize_reference_record((1,2026,2,4,5,2),manifest())
     with pytest.raises(SazuError): replace(event,source_id='../forged')
+
+
+def test_kernel_is_closed_when_validation_fails_without_context_protocol(tmp_path, monkeypatch):
+    import sys
+    from types import ModuleType, SimpleNamespace
+    import sazu.solar_terms as module
+
+    class Kernel:
+        closed = False
+        spk = SimpleNamespace(segments=[])
+
+        def close(self):
+            self.closed = True
+
+    kernel = Kernel()
+    fake = ModuleType('skyfield')
+    api = ModuleType('skyfield.api')
+    scale = SimpleNamespace(from_datetime=lambda value: SimpleNamespace(tdb=2460000.0))
+    api.Loader = lambda directory: SimpleNamespace(timescale=lambda builtin: scale)
+    api.load_file = lambda path: kernel
+    fake.api = api
+    fake.almanac = SimpleNamespace()
+    fake.almanac_east_asia = SimpleNamespace()
+    monkeypatch.setitem(sys.modules, 'skyfield', fake)
+    monkeypatch.setitem(sys.modules, 'skyfield.api', api)
+    (tmp_path/'fixture.npz').write_bytes(b'time-model')
+    monkeypatch.setattr(module.resources, 'files', lambda package: tmp_path)
+    monkeypatch.setattr(module, 'version', lambda package: 'fixture-version')
+    path = tmp_path/'kernel.bsp'
+    path.write_bytes(b'abc')
+    m = replace(fixture(), clock='TDB', precision='computed')
+    with pytest.raises(SazuError) as error:
+        module.generate_terms(2026, path, m)
+    assert error.value.code == 'DATA_INTEGRITY_FAILED'
+    assert kernel.closed
