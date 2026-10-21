@@ -1,0 +1,50 @@
+name: official-validation-bootstrap
+on:
+  push:
+    branches: [feat/official-source-validation-20261021]
+permissions:
+  contents: read
+jobs:
+  workspace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.5'
+      - name: Snapshot tracked public code and pinned tooling only
+        run: |
+          mkdir -p "$RUNNER_TEMP/bundle/wheels"
+          git archive --format=tar HEAD > "$RUNNER_TEMP/bundle/source.tar"
+          git rev-parse HEAD > "$RUNNER_TEMP/bundle/commit.txt"
+          python -m pip download --no-deps --only-binary=:all: -d "$RUNNER_TEMP/bundle/wheels" skyfield==1.55 jplephem==2.24 sgp4==2.27 ruff==0.14.10
+          tar -czf "$RUNNER_TEMP/validation-workspace.tar.gz" -C "$RUNNER_TEMP/bundle" .
+          sha256sum "$RUNNER_TEMP/validation-workspace.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: validation-workspace
+          path: ${{ runner.temp }}/validation-workspace.tar.gz
+          retention-days: 1
+      - name: Inspect official TXT format without publishing the dataset
+        run: |
+          curl --proto '=https' --fail --silent --show-error --max-time 60 --max-filesize 1048576 --retry 1 https://astro.kasi.re.kr/kor/almanac/solarTerms/download -o "$RUNNER_TEMP/kasi.txt"
+          KASI_PATH="$RUNNER_TEMP/kasi.txt" python - <<'PY'
+          import os, pathlib, hashlib
+          b=pathlib.Path(os.environ['KASI_PATH']).read_bytes()
+          print('bytes',len(b),'sha256',hashlib.sha256(b).hexdigest())
+          for encoding in ('utf-8-sig','cp949'):
+              try:
+                  text=b.decode(encoding)
+                  break
+              except UnicodeError:
+                  pass
+          else:
+              raise SystemExit('unsupported encoding')
+          lines=text.splitlines()
+          print('encoding',encoding,'lines',len(lines))
+          print('\n'.join(lines[:32]))
+          print('final-row',lines[-1])
+          PY
