@@ -42,6 +42,7 @@ jobs:
       - run: python -m pip install -r requirements-dev.lock -r requirements-astro.lock
       - run: python -m pip install --no-deps --no-build-isolation -e .
       - name: Explicit official acquisition, not a runtime dependency
+        id: acquire
         run: |
           set -euo pipefail
           date -u +ACQUIRED_AT=%Y-%m-%dT%H:%M:%SZ >> "$GITHUB_ENV"
@@ -72,3 +73,14 @@ jobs:
               result=json.loads(path.read_text()); audit=result.get('reference_comparison',{})
               print(json.dumps({'status':result['status'],'matched':audit.get('matched'),'expected':audit.get('expected'),'mismatch_count':len(audit.get('mismatches',[])),'production_authorized':False}))
           PY
+      - name: Separate clock hypothesis, never changes the failed numerical gate
+        if: ${{ always() && steps.acquire.outcome == 'success' }}
+        run: |
+          python -m tools.diagnose_term_clocks --kasi "$RUNNER_TEMP/kasi.txt" --kernel "$RUNNER_TEMP/de440s.bsp" --acquired-at "$ACQUIRED_AT" > "$RUNNER_TEMP/clock-diagnostic.json"
+          python - <<'PYDIAG'
+          import json, os, pathlib, hashlib
+          raw=(pathlib.Path(os.environ['RUNNER_TEMP'])/'clock-diagnostic.json').read_bytes()
+          report=json.loads(raw)
+          print(json.dumps({k:v for k,v in report.items() if k!='changed_keys'}))
+          print('changed_key_count',len(report['changed_keys']),'diagnostic_sha256',hashlib.sha256(raw).hexdigest())
+          PYDIAG
