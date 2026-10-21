@@ -1,47 +1,74 @@
-name: service-boundary-lock-import
+name: service-boundary
 on:
+  pull_request:
   push:
-    branches: [feat/express-python-boundary-20261021]
+    branches: [main]
 permissions:
   contents: read
+concurrency:
+  group: service-boundary-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  import-verified-lock:
-    if: github.ref == 'refs/heads/feat/express-python-boundary-20261021'
+  unit-and-process:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions:
-      contents: write
-      actions: read
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: feat/express-python-boundary-20261021
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
-        with:
-          name: service-dev-bundle
-          run-id: 39535578727
-          github-token: ${{ github.token }}
-          path: ${{ runner.temp }}/lock-import
-      - name: Restore only the previously tested npm lock, with exact digest
-        env:
-          BUNDLE_PATH: ${{ runner.temp }}/lock-import/service-dev-bundle.tar.gz
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with: {python-version: '3.13.5'}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24.22.0'}
+      - run: python -m pip install -r requirements-dev.lock
+      - run: python -m pip install --no-deps --no-build-isolation -e .
+      - run: python -m ruff check src tests tools
+      - run: python -m pytest -q
+      - run: npm ci --ignore-scripts && npm run typecheck && npm test && npm audit --audit-level=low
+        working-directory: apps/api
+      - run: python tools/test_service_boundary.py
+  compose-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with: {persist-credentials: false}
+      - name: Ephemeral credentials without logging
         run: |
           python - <<'PY'
-          import os, tarfile, json, hashlib, pathlib
-          archive=pathlib.Path(os.environ['BUNDLE_PATH'])
-          assert hashlib.sha256(archive.read_bytes()).hexdigest()=='ff050b66e3eec81fc74e4ec6785579062b25e009b16b27c2262fdfe140c96087'
-          with tarfile.open(archive) as tar:
-              member=tar.getmember('repo/apps/api/package-lock.json')
-              assert member.isfile() and member.size < 100000
-              lock=json.load(tar.extractfile(member))
-          lock['packages']['']['engines']={'node':'>=22.16 <25'}
-          data=(json.dumps(lock,ensure_ascii=False,separators=(',',':'))+'\n').encode()
-          assert hashlib.sha256(data).hexdigest()=='95489181830c4649d3b27d9fa8ec822ef5f427c1d1b2f36c243bb7421d85ac61'
-          pathlib.Path('apps/api/package-lock.json').write_bytes(data)
+          import os, secrets
+          keys=('RESEARCH_API_TOKEN','CALCULATOR_TOKEN','POSTGRES_ADMIN_PASSWORD','POSTGRES_APP_PASSWORD')
+          with os.fdopen(os.open('.env',os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600),'w') as f:
+              for name in keys: f.write(f'{name}={secrets.token_hex(32)}\n')
           PY
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add apps/api/package-lock.json
-          git diff --cached --quiet && exit 0
-          git commit -m 'build: preserve verified npm lock from isolated dependency bootstrap'
-          git push origin HEAD:feat/express-python-boundary-20261021
+      - run: docker compose config --quiet && docker compose up --build --wait --wait-timeout 180
+      - name: Real HTTP and PostgreSQL readiness
+        run: |
+          set -a; . ./.env; set +a
+          SAZU_TEST_BASE_URL=http://127.0.0.1:3000 python tools/test_service_boundary.py
+      - name: Internal ports and limited DB role
+        run: |
+          python - <<'PY'
+          import json, subprocess
+          for service in ('calculator','postgres'):
+              container=subprocess.check_output(['docker','compose','ps','-q',service],text=True).strip()
+              ports=json.loads(subprocess.check_output(['docker','inspect','--format','{{json .NetworkSettings.Ports}}',container],text=True))
+              assert not any(ports.values()), f'{service} published a port'
+          print('Internal ports are not published')
+          PY
+          docker compose exec -T postgres psql -U sazu_migrator -d sazu -Atc "SELECT rolsuper OR rolcreatedb OR rolcreaterole FROM pg_roles WHERE rolname='sazu_app'" | grep -qx f
+      - name: Dependency outages fail closed
+        run: |
+          docker compose stop postgres calculator
+          set -a; . ./.env; set +a
+          python - <<'PY'
+          import os, urllib.request, urllib.error
+          key=os.environ['RESEARCH_API_TOKEN']
+          for path,body in [('/health/ready',None),('/v1/research/calendar',b'{"kind":"gregorian","year":2024,"month":2,"day":10}')]:
+              req=urllib.request.Request('http://127.0.0.1:3000'+path,data=body,headers={'Authorization':'Bearer '+key,'Content-Type':'application/json'})
+              try: urllib.request.urlopen(req,timeout=10); raise AssertionError('Unexpected success during outage')
+              except urllib.error.HTTPError as exc: assert exc.code==503
+          print('Stopped dependencies return 503 without fallback')
+          PY
+      - name: Clean only the ephemeral CI stack
+        if: always()
+        run: docker compose down -v
