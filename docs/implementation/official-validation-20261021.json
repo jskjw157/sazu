@@ -1,0 +1,139 @@
+{
+  "record_date": "2026-10-21",
+  "code_commit": "f26492be015d54df59eb0c9d6e7bc8cb88d2ff34",
+  "state": "implementation_tested_numeric_gate_failed",
+  "production_authorized": false,
+  "local_checks": {
+    "python_passed": 323,
+    "python_skipped": 1,
+    "python_failed": 0,
+    "python_seconds": 21.88,
+    "skip_reason": "existing local JPL kernel integration not provisioned",
+    "new_test_cases": 102,
+    "node_passed": 46,
+    "real_service_process_cases_passed": 8,
+    "ruff": "passed",
+    "typescript": "passed",
+    "compileall": "passed",
+    "independent_code_review": "not_run"
+  },
+  "official_comparison": {
+    "run_id": 39562263067,
+    "run_url": "https://github.com/jskjw157/sazu/actions/runs/39562263067",
+    "status": "failed",
+    "years": [
+      1920,
+      2050
+    ],
+    "expected": 3144,
+    "matched": 2830,
+    "mismatched": 314,
+    "missing": 0,
+    "extra": 0,
+    "duplicate": 0,
+    "all_mismatch_deltas_negative": true,
+    "maximum_absolute_difference_from_display_seconds": 50.070476,
+    "physical_accuracy": "not_inferred",
+    "candidate_sha256": "c136a26bac55f6fec41ed377ba433e446abcf574f85f8265f17dbfc344902546",
+    "source_sha256": "508761248c7d18eb1ca1bcb1fcace2ba29f3f511d085321ae1e633c74d8e9e34",
+    "model_id": "c1b5092e6dd26c5e35e59c9118c05b7cd708782fe5e3900aefbb0f9c58dc5744",
+    "report_sha256": "77f43de4478365cbe5a5f0c5bd76691caaadd6ed19bfd2bb9d51f34bc30a7692",
+    "reference_document_rows": 4344,
+    "reference_document_years": [
+      1920,
+      2100
+    ]
+  },
+  "mismatches_by_period": [
+    {
+      "years": [
+        1920,
+        1959
+      ],
+      "count": 257
+    },
+    {
+      "years": [
+        1960,
+        1971
+      ],
+      "count": 26
+    },
+    {
+      "years": [
+        1972,
+        2025
+      ],
+      "count": 19
+    },
+    {
+      "years": [
+        2026,
+        2050
+      ],
+      "count": 12
+    }
+  ],
+  "reproduction": {
+    "first_run_id": 39561466679,
+    "second_run_id": 39562263067,
+    "all_mismatch_keys_and_deltas_identical": true,
+    "candidate_digest_identical": true
+  },
+  "complete_report": {
+    "artifact_id": 12328526062,
+    "url": "https://github.com/jskjw157/sazu/actions/runs/39562263067/artifacts/12328526062",
+    "retention_days": 30,
+    "zip_sha256": "1cd1abb3ad307b5578fe864e8b4650e6c80cc96f183b666b9146d8ae33ff2741",
+    "json_sha256": "1d775590cab5d641429f12188043ebbfe8579b680a557eb727c2a22e119a8b82",
+    "includes_all_mismatch_keys": true,
+    "upstream_txt_or_bsp_included": false
+  },
+  "clock_diagnostic": {
+    "status": "hypothesis_only",
+    "adopted": false,
+    "source_clock_still_declared": "fixed-UTC+9",
+    "baseline_matches": 2830,
+    "ut1_display_hypothesis_matches": 3101,
+    "ut1_display_hypothesis_mismatches": 43,
+    "before_1972": {
+      "total": 1248,
+      "utc_matches": 965,
+      "ut1_hypothesis_matches": 1239
+    },
+    "1972_through_2025": {
+      "total": 1296,
+      "utc_matches": 1277,
+      "ut1_hypothesis_matches": 1280
+    },
+    "2026_through_2050": {
+      "total": 600,
+      "utc_matches": 588,
+      "ut1_hypothesis_matches": 582
+    },
+    "diagnostic_file_sha256": "f61dfe0e8e88a66c5e1259fc4de74e3814e555952c205b8a1ee8ee153c7849aa",
+    "warning": "UT1 is not UTC. Improved fit does not confirm the source clock or authorize an operational change."
+  },
+  "remaining_gates": [
+    {
+      "gate": "korean-lunar-official-full-range",
+      "status": "not_run"
+    },
+    {
+      "gate": "source-rights-review",
+      "status": "not_approved"
+    },
+    {
+      "gate": "physical-ephemeris-independence",
+      "status": "not_established"
+    },
+    {
+      "gate": "production-activation",
+      "status": "not_implemented"
+    }
+  ],
+  "ci_service_boundary": {
+    "run_id": 39562263057,
+    "status": "success"
+  }
+}
