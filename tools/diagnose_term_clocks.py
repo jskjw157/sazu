@@ -71,7 +71,8 @@ def main():
     reference = parse_kasi_document(read_reference_bytes(args.kasi, manifest), manifest)
     candidates = []
     for year in range(1920, 2051):
-        candidates.extend(generate_terms(year, args.kernel, _manifest(request['kernel_manifest'])))
+        candidates.extend(generate_terms(year, args.kernel, _manifest(request['kernel_manifest']),
+                                             clock_policy='legacy-skyfield-v1'))
     from skyfield.api import load
     ts = load.timescale(builtin=True)
     report = diagnose_clocks(candidates, reference, 1920, 2050,

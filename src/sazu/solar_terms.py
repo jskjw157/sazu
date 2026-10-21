@@ -8,6 +8,7 @@ from importlib.metadata import version
 import math
 from pathlib import Path
 
+from .clock_projection import UtcProjection, POLICY_ID, project_tt, projection_identity
 from .contracts import SourceManifest, strict_int, utc_datetime, valid_hash, valid_id
 from .errors import SazuError, require
 from .serde import digest
@@ -36,7 +37,7 @@ class SolarTermEvent:
     kasi_id: int
     name: str
     longitude: int
-    instant_utc: datetime
+    instant_utc: datetime | None
     original_time: str | None
     precision: str
     lower_utc: datetime | None
@@ -47,15 +48,30 @@ class SolarTermEvent:
     model_id: str | None = None
     numerical_tolerance_days: float | None = None
     physical_uncertainty: str = 'unknown'
+    utc_projection: UtcProjection | None = None
 
     def __post_init__(self):
         require(strict_int(self.event_year, 1919, 2051) and strict_int(self.kasi_id, 1, 24))
         term = TERMS[self.kasi_id-1]
         require(self.name == term.name and type(self.longitude) is int
                 and self.longitude == term.longitude)
-        require(utc_datetime(self.instant_utc) and valid_hash(self.source_sha256)
-                and valid_id(self.source_id))
-        require(self.instant_utc.astimezone(FIXED_KST).year == self.event_year)
+        require(valid_hash(self.source_sha256) and valid_id(self.source_id))
+        if self.utc_projection is not None:
+            require(type(self.utc_projection) is UtcProjection
+                    and self.precision == 'computed'
+                    and self.utc_projection.policy_id == POLICY_ID
+                    and self.utc_projection.instant_utc == self.instant_utc
+                    and self.utc_projection.tt_day+self.utc_projection.tt_fraction == self.tt_jd)
+        if self.instant_utc is None:
+            require(self.utc_projection is not None
+                    and self.utc_projection.status in {'utc_undefined_before_1960', 'utc_leap_second'})
+            require(self.utc_projection.status != 'utc_undefined_before_1960' or self.event_year < 1960)
+            # TT is retained; UTC is intentionally absent, never synthesized.
+            tt_calendar = datetime(2000, 1, 1, 12)+timedelta(days=self.tt_jd-2451545.0, hours=9)
+            require(tt_calendar.year == self.event_year)
+        else:
+            require(utc_datetime(self.instant_utc))
+            require(self.instant_utc.astimezone(FIXED_KST).year == self.event_year)
         require(type(self.precision) is str and self.precision in {'computed', 'rounded_minute', 'unknown'})
         if self.precision == 'rounded_minute':
             require(self.lower_utc == self.instant_utc-timedelta(seconds=30)
@@ -119,17 +135,28 @@ def validate_annual_terms(events, year: int) -> tuple[SolarTermEvent, ...]:
             'DATA_INTEGRITY_FAILED')
     require(all(e.event_year == year for e in events) and
             {e.kasi_id for e in events} == set(range(1, 25)), 'DATA_INTEGRITY_FAILED')
-    ordered = tuple(sorted(events, key=lambda e: e.instant_utc))
+    unresolved = any(e.instant_utc is None for e in events)
+    if unresolved:
+        require(all(e.precision == 'computed' and e.tt_jd is not None for e in events),
+                'DATA_INTEGRITY_FAILED')
+    ordering = (lambda e: e.tt_jd) if unresolved else (lambda e: e.instant_utc)
+    ordered = tuple(sorted(events, key=ordering))
     require([e.kasi_id for e in ordered] == [23, 24, *range(1, 23)], 'DATA_INTEGRITY_FAILED')
-    require(all(a.instant_utc < b.instant_utc for a, b in zip(ordered, ordered[1:])),
+    require(all(ordering(a) < ordering(b) for a, b in zip(ordered, ordered[1:])),
             'DATA_INTEGRITY_FAILED')
     require(len({(e.source_id, e.source_sha256, e.model_id) for e in ordered}) == 1,
             'SOURCE_CONFLICT')
     return ordered
 
 
-def generate_terms(year: int, kernel_path: Path, manifest: SourceManifest) -> tuple[SolarTermEvent, ...]:
-    """Compute with a verified LOCAL BSP. No runtime downloads are permitted."""
+def generate_terms(year: int, kernel_path: Path, manifest: SourceManifest, *,
+                   clock_policy: str = POLICY_ID) -> tuple[SolarTermEvent, ...]:
+    """Compute locally, with historical UTC projection separate from the TT root.
+
+    ``legacy-skyfield-v1`` exists ONLY to reproduce previously recorded evidence.
+    It must not be used to claim historical UTC correctness before 1972.
+    """
+    require(clock_policy in {POLICY_ID, 'legacy-skyfield-v1'})
     require(strict_int(year, 1919, 2051))
     require(type(manifest) is SourceManifest and manifest.clock == 'TDB'
             and manifest.precision == 'computed')
@@ -145,9 +172,13 @@ def generate_terms(year: int, kernel_path: Path, manifest: SourceManifest) -> tu
     assets = {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
               for p in root.iterdir() if p.name.endswith(('.npy', '.npz', '.data'))}
     require(bool(assets), 'SOURCE_NOT_AVAILABLE')
-    model = digest({'skyfield': version('skyfield'), 'builtin_time_assets': assets,
-                    'kernel': manifest.sha256, 'mapping': 'kasi-longitude-v1',
-                    'epsilon_days': 1e-8})
+    model_parameters = {'skyfield': version('skyfield'), 'builtin_time_assets': assets,
+                        'kernel': manifest.sha256, 'mapping': 'kasi-longitude-v1',
+                        'epsilon_days': 1e-8}
+    clock_identity = projection_identity() if clock_policy == POLICY_ID else None
+    if clock_identity is not None:
+        model_parameters['utc_projection'] = clock_identity
+    model = digest(model_parameters)
     ts = Loader(str(Path(kernel_path).parent)).timescale(builtin=True)
     low = datetime(year, 1, 1, tzinfo=FIXED_KST).astimezone(UTC)
     high = datetime(year+1, 1, 1, tzinfo=FIXED_KST).astimezone(UTC)
@@ -162,14 +193,22 @@ def generate_terms(year: int, kernel_path: Path, manifest: SourceManifest) -> tu
                                                  epsilon=1e-8)
             events = []
             for t, index in zip(times, indices):
-                instant = t.utc_datetime()
-                if not low <= instant < high:
+                # Search-window membership is indexing, not a UTC assertion about a
+                # pre-1960 event. No solar term occurs at the New Year bracket edge.
+                legacy_index_time = t.utc_datetime()
+                if not low <= legacy_index_time < high:
                     continue
+                projection = (project_tt(float(t.whole), float(t.tt_fraction))
+                              if clock_identity is not None else None)
+                instant = projection.instant_utc if projection is not None else legacy_index_time
                 identifier = ((int(index)*15-315) % 360)//15+1
                 term = TERMS[identifier-1]
                 events.append(SolarTermEvent(year, identifier, term.name, term.longitude, instant,
                                              None, 'computed', None, None, manifest.source_id,
-                                             manifest.sha256, float(t.tt), model, 1e-8))
+                                             manifest.sha256, float(t.tt), model, 1e-8,
+                                             utc_projection=projection))
+            if clock_identity is not None:
+                require(projection_identity() == clock_identity, 'SOURCE_CONFLICT')
             return validate_annual_terms(events, year)
     except SazuError:
         raise
