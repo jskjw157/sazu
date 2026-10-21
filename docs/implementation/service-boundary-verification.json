@@ -1,0 +1,45 @@
+{
+  "scope": "research_http_boundary_not_production_approval",
+  "base_sha": "f7d48b4443dafd30716ead04a23a68f0bd11f1a9",
+  "local_python": "3.13.5",
+  "local_node": "22.16.0",
+  "target_node": "24.22.0",
+  "python_pytest": {
+    "passed": 221,
+    "skipped": 1,
+    "failed": 0,
+    "skip_reason": "existing JPL integration kernel absent"
+  },
+  "node_test_runner": {
+    "passed": 46,
+    "failed": 0
+  },
+  "strict_typescript_build": "passed",
+  "real_process_integration": {
+    "passed": 8,
+    "failed": 0,
+    "database_case": "database deliberately absent; readiness 503"
+  },
+  "compose_static_safety": {
+    "passed": 5,
+    "included_in_python_total": true
+  },
+  "npm_audit_bootstrap": {
+    "total": 0,
+    "note": "Registry audit captured during public dependency bootstrap; not full security certification"
+  },
+  "red_green": {
+    "python_http": "41 fail -> 41 pass (one response helper status-name collision corrected)",
+    "node": "41 fail -> 41 pass; review added 5 tests, BOM regression failed then fixed; 46 pass",
+    "packaging": "5 fail -> 5 pass",
+    "process": "missing entrypoint -> 8 pass"
+  },
+  "limitations": [
+    "Local Docker and Ruff unavailable; CI execution must be observed separately.",
+    "No user authentication/persistence/pillars/commercial API/production authorization.",
+    "No independent official data full-range verification performed.",
+    "Python dependency artifact hashes and container image digests not yet fully pinned.",
+    "No independent human/subagent code review performed; inline review and automated tests only."
+  ],
+  "lock_sha256": "95489181830c4649d3b27d9fa8ec822ef5f427c1d1b2f36c243bb7421d85ac61"
+}
