@@ -1,38 +1,47 @@
-name: service-boundary
+name: service-boundary-lock-import
 on:
   push:
     branches: [feat/express-python-boundary-20261021]
 permissions:
   contents: read
 jobs:
-  bootstrap:
+  import-verified-lock:
+    if: github.ref == 'refs/heads/feat/express-python-boundary-20261021'
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '24'
-      - name: Public source and dependencies only
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/bundle/repo/apps/api"
-          git archive HEAD | tar -x -C "$RUNNER_TEMP/bundle/repo"
-          cd "$RUNNER_TEMP/bundle/repo/apps/api"
-          printf '%s\n' '{"name":"@sazu/api","version":"0.1.0","private":true,"type":"module"}' > package.json
-          npm install --ignore-scripts --save-exact express@5 ajv@8 pg@8
-          npm install --ignore-scripts --save-dev --save-exact typescript@5 @types/node@24 @types/express@5 @types/pg@8
-          node --version > "$RUNNER_TEMP/bundle/node-version.txt"
-          npm --version > "$RUNNER_TEMP/bundle/npm-version.txt"
-          npm audit --json > "$RUNNER_TEMP/bundle/audit.json" || true
-          cd "$RUNNER_TEMP/bundle"
-          tar -czf "$RUNNER_TEMP/service-dev-bundle.tar.gz" repo node-version.txt npm-version.txt audit.json
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+          ref: feat/express-python-boundary-20261021
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: service-dev-bundle
-          path: ${{ runner.temp }}/service-dev-bundle.tar.gz
-          retention-days: 1
-          if-no-files-found: error
+          run-id: 39535578727
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/lock-import
+      - name: Restore only the previously tested npm lock, with exact digest
+        env:
+          BUNDLE_PATH: ${{ runner.temp }}/lock-import/service-dev-bundle.tar.gz
+        run: |
+          python - <<'PY'
+          import os, tarfile, json, hashlib, pathlib
+          archive=pathlib.Path(os.environ['BUNDLE_PATH'])
+          assert hashlib.sha256(archive.read_bytes()).hexdigest()=='ff050b66e3eec81fc74e4ec6785579062b25e009b16b27c2262fdfe140c96087'
+          with tarfile.open(archive) as tar:
+              member=tar.getmember('repo/apps/api/package-lock.json')
+              assert member.isfile() and member.size < 100000
+              lock=json.load(tar.extractfile(member))
+          lock['packages']['']['engines']={'node':'>=22.16 <25'}
+          data=(json.dumps(lock,ensure_ascii=False,separators=(',',':'))+'\n').encode()
+          assert hashlib.sha256(data).hexdigest()=='95489181830c4649d3b27d9fa8ec822ef5f427c1d1b2f36c243bb7421d85ac61'
+          pathlib.Path('apps/api/package-lock.json').write_bytes(data)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/api/package-lock.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'build: preserve verified npm lock from isolated dependency bootstrap'
+          git push origin HEAD:feat/express-python-boundary-20261021

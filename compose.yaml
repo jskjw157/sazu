@@ -1,0 +1,69 @@
+# Local research stack. Only the gateway is bound to host loopback.
+services:
+  api:
+    build:
+      context: ./apps/api
+    environment:
+      SAZU_MODE: research
+      HOST: 0.0.0.0
+      PORT: '3000'
+      RESEARCH_API_TOKEN: ${RESEARCH_API_TOKEN:?Set a distinct random 64-character hex token}
+      CALCULATOR_TOKEN: ${CALCULATOR_TOKEN:?Set a distinct random 64-character hex token}
+      PYTHON_BASE_URL: http://calculator:8000
+      DATABASE_URL: postgresql://sazu_app:${POSTGRES_APP_PASSWORD:?Set a random hex password}@postgres:5432/sazu
+      PYTHON_TIMEOUT_MS: '3000'
+    ports: ['127.0.0.1:3000:3000']
+    networks: [edge, compute, storage]
+    read_only: true
+    tmpfs: ['/tmp']
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    init: true
+    depends_on:
+      calculator: {condition: service_healthy}
+      postgres: {condition: service_healthy}
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3000/health/ready',{headers:{authorization:'Bearer '+process.env.RESEARCH_API_TOKEN}}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  calculator:
+    build:
+      context: .
+      dockerfile: infra/calculator.Dockerfile
+    environment:
+      SAZU_MODE: research
+      CALCULATOR_TOKEN: ${CALCULATOR_TOKEN:?Set a distinct random 64-character hex token}
+    networks: [compute]
+    read_only: true
+    tmpfs: ['/tmp']
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    init: true
+    healthcheck:
+      test: ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live',timeout=2).close()"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  postgres:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: sazu
+      POSTGRES_USER: sazu_migrator
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?Set a random hex admin password}
+      SAZU_DB_PASSWORD: ${POSTGRES_APP_PASSWORD:?Set a distinct random hex app password}
+    networks: [storage]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/001-role.sql:/docker-entrypoint-initdb.d/001-role.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U sazu_migrator -d sazu']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+networks:
+  edge: {}
+  compute: {internal: true}
+  storage: {internal: true}
+volumes:
+  postgres_data: {}

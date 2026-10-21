@@ -1,0 +1,17 @@
+.git
+.env
+.env.*
+!.env.example
+.evidence
+.superpowers
+node_modules
+**/node_modules
+**/dist
+**/__pycache__
+*.bsp
+data/raw
+data/generated
+credentials
+private
+*.key
+*.pem
