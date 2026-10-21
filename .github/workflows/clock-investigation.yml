@@ -27,8 +27,8 @@ jobs:
           python -m pip download --no-deps --only-binary=:all: -d "$RUNNER_TEMP/evidence/wheels" skyfield==1.55 jplephem==2.24 sgp4==2.27 ruff==0.14.10
       - name: Acquire references for this runner only
         run: |
-          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --max-time 90 --max-filesize 1048576 --retry 2 https://astro.kasi.re.kr/kor/almanac/solarTerms/download -o "$RUNNER_TEMP/kasi.txt"
-          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --max-time 120 --max-filesize 67108864 --retry 2 https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp -o "$RUNNER_TEMP/de440s.bsp"
+          curl -4 --http1.1 --retry-all-errors --proto '=https' --tlsv1.2 --fail --silent --show-error --max-time 90 --max-filesize 1048576 --retry 2 https://astro.kasi.re.kr/kor/almanac/solarTerms/download -o "$RUNNER_TEMP/kasi.txt"
+          curl -4 --http1.1 --retry-all-errors --proto '=https' --tlsv1.2 --fail --silent --show-error --max-time 120 --max-filesize 67108864 --retry 2 https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp -o "$RUNNER_TEMP/de440s.bsp"
           echo "508761248c7d18eb1ca1bcb1fcace2ba29f3f511d085321ae1e633c74d8e9e34  $RUNNER_TEMP/kasi.txt" | sha256sum -c -
           echo "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2  $RUNNER_TEMP/de440s.bsp" | sha256sum -c -
       - name: Independent clock and rounding hypotheses, never operational corrections
