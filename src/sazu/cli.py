@@ -8,7 +8,8 @@ from .calendar import CalendarInput, convert_calendar, library_identity
 from .contracts import SourceManifest
 from .errors import SazuError, require
 from .serde import canonical_json, parse_request
-from .solar_terms import generate_terms, normalize_reference_record
+from .solar_terms import normalize_reference_record
+from .term_clock import generate_reviewed_terms
 from .sources import verify_file, acquire_source
 from .temporal import TimeInput, normalize_time
 from .tzif import load_zone
@@ -71,7 +72,7 @@ def dispatch(command: str, request: dict):
         require(type(request['path']) is str and 0 < len(request['path']) <= 4096)
         path = Path(request['path'])
         manifest = _manifest(request['manifest'])
-        if command == 'generate-terms': return generate_terms(request['year'],path,manifest)
+        if command == 'generate-terms': return generate_reviewed_terms(request['year'],path,manifest)
         if command == 'acquire-source': return {'sha256': acquire_source(request['url'],path,manifest)}
         return {'sha256': verify_file(path,manifest)}
     if command == 'environment':

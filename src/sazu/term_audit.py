@@ -37,6 +37,7 @@ def compare_term_range(candidate, document: KasiDocument, start_year: int, end_y
     counts = Counter((e.event_year, e.kasi_id) for e in ordered)
     report = {'schema_version': 1, 'status': 'blocked', 'production_authorized': False,
               'evidence_level': 'published_reference_numerical_comparison',
+              'clock_projection': 'legacy_skyfield_utc_for_replay_only',
               'physical_source_independence': 'not_established',
               'comparison_policy': 'nearest-minute-half-up-v1',
               'requested_years': [start_year, end_year], 'expected': len(expected_keys),
