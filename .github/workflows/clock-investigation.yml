@@ -1,0 +1,74 @@
+name: clock-investigation
+on:
+  push:
+    branches: [fix/solar-term-clock-20261022]
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.5'
+      - run: python -m pip install -r requirements-dev.lock -r requirements-astro.lock
+      - run: python -m pip install --no-deps --no-build-isolation -e .
+      - name: Public source snapshot only
+        run: |
+          mkdir -p "$RUNNER_TEMP/evidence/wheels"
+          git archive HEAD > "$RUNNER_TEMP/evidence/source.tar"
+          git rev-parse HEAD > "$RUNNER_TEMP/evidence/commit.txt"
+          python -m pip download --no-deps --only-binary=:all: -d "$RUNNER_TEMP/evidence/wheels" skyfield==1.55 jplephem==2.24 sgp4==2.27 ruff==0.14.10
+      - name: Acquire references for this runner only
+        run: |
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --max-time 90 --max-filesize 1048576 --retry 2 https://astro.kasi.re.kr/kor/almanac/solarTerms/download -o "$RUNNER_TEMP/kasi.txt"
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --max-time 120 --max-filesize 67108864 --retry 2 https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp -o "$RUNNER_TEMP/de440s.bsp"
+          echo "508761248c7d18eb1ca1bcb1fcace2ba29f3f511d085321ae1e633c74d8e9e34  $RUNNER_TEMP/kasi.txt" | sha256sum -c -
+          echo "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2  $RUNNER_TEMP/de440s.bsp" | sha256sum -c -
+      - name: Independent clock and rounding hypotheses, never operational corrections
+        run: |
+          python - <<'PY'
+          import os,json,statistics,hashlib
+          from pathlib import Path
+          from datetime import UTC,datetime
+          from sazu.cli import _manifest
+          from sazu.kasi_reference import parse_kasi_document,reference_events
+          from sazu.solar_terms import generate_terms
+          from tools.audit_official_terms import build_request
+          from skyfield.api import load
+          p=Path(os.environ['RUNNER_TEMP']); req=build_request(p/'kasi.txt',p/'de440s.bsp',datetime.now(UTC),1920,2050)
+          doc=parse_kasi_document((p/'kasi.txt').read_bytes(),_manifest(req['reference_manifest']))
+          refs={(e.event_year,e.kasi_id):e for e in reference_events(doc,1920,2050)}
+          ts=load.timescale(builtin=True); rows=[]
+          for y in range(1920,2051):
+              for e in generate_terms(y,p/'de440s.bsp',_manifest(req['kernel_manifest'])):
+                  d=(e.instant_utc-refs[y,e.kasi_id].instant_utc).total_seconds(); t=ts.tt_jd(e.tt_jd)
+                  rows.append({'year':y,'term':e.kasi_id,'utc_delta':d,'dut1':float(t.dut1),'delta_t':float(t.delta_t),'tt_jd':e.tt_jd})
+          models={
+            'utc':lambda r:r['utc_delta'],
+            'ut1':lambda r:r['utc_delta']+r['dut1'],
+            'utc_second_then_minute_rounding':lambda r:r['utc_delta']+0.5,
+            'ut1_second_then_minute_rounding':lambda r:r['utc_delta']+r['dut1']+0.5,
+          }
+          summaries={}
+          for name,model in models.items():
+              ds=[model(r) for r in rows]
+              summaries[name]={'matched':sum(-30<=d<30 for d in ds),'min':min(ds),'max':max(ds),'mean':statistics.mean(ds),'negative_failures':sum(d < -30 for d in ds),'positive_failures':sum(d>=30 for d in ds)}
+          annual=[{'year':y,'mean_utc_delta':statistics.mean(r['utc_delta'] for r in rows if r['year']==y),'mean_dut1':statistics.mean(r['dut1'] for r in rows if r['year']==y)} for y in range(1920,2051)]
+          result={'diagnostic_only':True,'production_authorized':False,'summaries':summaries,'annual':annual,'rows':rows,'source_sha256':hashlib.sha256((p/'kasi.txt').read_bytes()).hexdigest()}
+          (p/'evidence'/'clock-probe.json').write_text(json.dumps(result,separators=(',',':')))
+          print(json.dumps(summaries,indent=2))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: clock-investigation
+          path: ${{ runner.temp }}/evidence
+          retention-days: 7
+          if-no-files-found: error
