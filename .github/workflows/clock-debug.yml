@@ -20,91 +20,17 @@ jobs:
       - run: |
           python -m pip install -r requirements-dev.lock -r requirements-astro.lock pyerfa==2.0.1.5
           python -m pip install --no-deps --no-build-isolation -e .
-          mkdir -p "$RUNNER_TEMP/workspace/wheels"
-          git archive HEAD > "$RUNNER_TEMP/workspace/source.tar"
-          git rev-parse HEAD > "$RUNNER_TEMP/workspace/commit.txt"
-          python -m pip download --no-deps --only-binary=:all: -d "$RUNNER_TEMP/workspace/wheels" pyerfa==2.0.1.5
-          tar -czf "$RUNNER_TEMP/clock-workspace.tar.gz" -C "$RUNNER_TEMP/workspace" .
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: clock-workspace
-          path: ${{ runner.temp }}/clock-workspace.tar.gz
-          retention-days: 1
       - name: Acquire fixed public reference inputs for this diagnostic only
         run: |
           curl --proto '=https' --tlsv1.2 --fail --silent --show-error --max-time 90 --max-filesize 1048576 https://astro.kasi.re.kr/kor/almanac/solarTerms/download -o "$RUNNER_TEMP/kasi.txt"
           curl --proto '=https' --tlsv1.2 --fail --silent --show-error --max-time 120 --max-filesize 67108864 https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp -o "$RUNNER_TEMP/de440s.bsp"
           echo "508761248c7d18eb1ca1bcb1fcace2ba29f3f511d085321ae1e633c74d8e9e34  $RUNNER_TEMP/kasi.txt" | sha256sum -c -
           echo "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2  $RUNNER_TEMP/de440s.bsp" | sha256sum -c -
-      - name: Compare one-variable clock and full-nutation hypotheses without changing production
-        run: |
-          python - <<'PY'
-          import json, os, pathlib, warnings
-          from datetime import datetime, UTC, timedelta
-          import numpy as np
-          import erfa
-          from skyfield.api import load, load_file
-          from skyfield import almanac
-          from sazu.cli import _manifest
-          from sazu.kasi_reference import parse_kasi_document, reference_events
-          from sazu.source_audit import read_reference_bytes
-          from sazu.solar_terms import generate_terms, FIXED_KST
-          from tools.audit_official_terms import build_request
-          from importlib.metadata import version
-          root=pathlib.Path(os.environ['RUNNER_TEMP'])
-          request=build_request(root/'kasi.txt',root/'de440s.bsp',datetime.now(UTC),1920,2050)
-          manifest=_manifest(request['reference_manifest'])
-          refs=reference_events(parse_kasi_document(read_reference_bytes(root/'kasi.txt',manifest),manifest),1920,2050)
-          ts=load.timescale(builtin=True)
-          eph=load_file(str(root/'de440s.bsp'))
-          earth,sun=eph['earth'],eph['sun']
-          def full(t):
-              _,lon,_=earth.at(t).observe(sun).apparent().ecliptic_latlon('date')
-              return (lon.radians//(np.pi/12)%24).astype(int)
-          full.step_days=14.0
-          records=[]
-          try:
-              for year in range(1920,2051):
-                  base=generate_terms(year,root/'de440s.bsp',_manifest(request['kernel_manifest']))
-                  start=ts.from_datetime(datetime(year,1,1,tzinfo=FIXED_KST))
-                  end=ts.from_datetime(datetime(year+1,1,1,tzinfo=FIXED_KST))
-                  ft,fi=almanac.find_discrete(start,end,full,epsilon=1e-8)
-                  fulls={((int(i)*15-315)%360)//15+1:t for i,t in zip(fi,ft)}
-                  for v,r in zip(base,refs[(year-1920)*24:(year-1919)*24]):
-                      assert (v.event_year,v.kasi_id)==(r.event_year,r.kasi_id)
-                      t=ts.tt_jd(v.tt_jd)
-                      d=(v.instant_utc-r.instant_utc).total_seconds()
-                      f=fulls[v.kasi_id]
-                      df=(f.utc_datetime()-r.instant_utc).total_seconds()
-                      # SOFA/ERFA pre-1972 UTC drift is valid from 1960; no UTC extrapolation before 1960.
-                      ed=None
-                      if 1960<=year<=2025:
-                          with warnings.catch_warnings():
-                              warnings.simplefilter('ignore',erfa.ErfaWarning)
-                              ta,tb=erfa.tttai(float(t.whole),float(t.tt_fraction))
-                              ua,ub=erfa.taiutc(ta,tb)
-                              y,m,day,hms=erfa.d2dtf('UTC',6,ua,ub)
-                          et=datetime(int(y),int(m),int(day),int(hms['h']),int(hms['m']),int(hms['s']),int(hms['f']),tzinfo=UTC)
-                          ed=(et-r.instant_utc).total_seconds()
-                      records.append({'year':year,'term':v.kasi_id,'utc_difference_seconds':d,
-                          'ut1_difference_seconds':d+float(t.dut1),'erfa_utc_difference_seconds':ed,
-                          'full_nutation_utc_difference_seconds':df,'full_nutation_ut1_difference_seconds':df+float(f.dut1),
-                          'tt_jd':v.tt_jd,'dut1':float(t.dut1),'delta_t':float(t.delta_t)})
-          finally:
-              eph.close()
-          summary={}
-          for key in ['utc_difference_seconds','ut1_difference_seconds','erfa_utc_difference_seconds','full_nutation_utc_difference_seconds','full_nutation_ut1_difference_seconds']:
-              summary[key]={}
-              for label,lo,hi in [('all',1920,2050),('before_1960',1920,1959),('1960_1971',1960,1971),('1972_2025',1972,2025),('future',2026,2050)]:
-                  vals=[r[key] for r in records if lo<=r['year']<=hi and r[key] is not None]
-                  if vals: summary[key][label]={'total':len(vals),'match':sum(-30<=d<30 for d in vals),'min':min(vals),'max':max(vals),'mean':sum(vals)/len(vals)}
-          result={'production_authorized':False,'adopted':False,'status':'diagnostic_only','packages':{n:version(n) for n in ['skyfield','pyerfa','numpy']},'summary':summary,'diagnostic_residuals':records}
-          (root/'clock-probe.json').write_text(json.dumps(result,indent=2))
-          print(json.dumps(summary,indent=2))
-          PY
+      - name: Research-only coordinate convention comparison
+        run: python -m tools.probe_reference_frames
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: clock-probe
-          path: ${{ runner.temp }}/clock-probe.json
+          name: frame-probe
+          path: ${{ runner.temp }}/frame-probe.json
           retention-days: 30
