@@ -53,9 +53,10 @@ def run_audit(kasi: Path, kernel: Path, acquired_at: datetime,
         auxiliary.append({'year':year, 'event_count':len(events), 'sha256':digest(events),
                           'evidence_level':'structure_only_not_reference_comparison'})
     packages = {name:version(name) for name in
-                ('skyfield','jplephem','sgp4','numpy','korean-lunar-calendar','tzdata')}
+                ('skyfield','jplephem','sgp4','numpy','korean-lunar-calendar','tzdata','pyerfa')}
     code_paths = ('src/sazu/kasi_reference.py','src/sazu/term_audit.py',
-                  'src/sazu/source_audit.py','src/sazu/solar_terms.py','tools/audit_official_terms.py')
+                  'src/sazu/source_audit.py','src/sazu/solar_terms.py','src/sazu/term_clock.py',
+                  'src/sazu/reviewed_term_audit.py','tools/audit_official_terms.py')
     output = {'status':comparison['status'], 'production_authorized':False,
         'reference_comparison':comparison, 'auxiliary_years':auxiliary,
         'environment':{'python':platform.python_version(), 'packages':packages,

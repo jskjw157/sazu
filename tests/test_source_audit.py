@@ -99,11 +99,11 @@ def test_fifo_rejected_without_hanging(tmp_path):
     with pytest.raises(SazuError):read_reference_bytes(fifo,m)
 
 
-def test_batch_uses_existing_generator_and_compares(tmp_path,monkeypatch):
+def test_explicit_legacy_batch_preserves_the_previous_comparison(tmp_path,monkeypatch):
     import sazu.source_audit as module
     payload=request(tmp_path);_,candidate=comparison_inputs()
     monkeypatch.setattr(module,'generate_terms',lambda year,path,m:tuple(candidate))
-    report=module.execute_audit('compare',payload)
+    report=module.execute_audit('compare-legacy',payload)
     assert report['matched']==24 and report['status']=='passed'
 
 
