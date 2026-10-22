@@ -1,0 +1,78 @@
+name: utc-integration-import
+on:
+  push:
+    branches: [fix/solar-term-time-basis-20261022]
+    paths: [.github/workflows/utc-integration-import.yml]
+permissions:
+  contents: read
+jobs:
+  apply-and-verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.5'
+      - name: Integrate exactly the already tested source files
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          r=Path('.')
+          p=r/'src/sazu/solar_terms.py';s=p.read_text()
+          assert 'project_solar_time' not in s
+          s=s.replace('from .sources import verify_file','from .sources import verify_file\nfrom .utc_history import POLICY, erfa_identity, project_solar_time')
+          s=s.replace("    physical_uncertainty: str = 'unknown'", "    physical_uncertainty: str = 'unknown'\n    clock_basis: str = 'unspecified'")
+          s=s.replace("        require(self.physical_uncertainty == 'unknown')", "        require(self.physical_uncertainty == 'unknown')\n        require(type(self.clock_basis) is str and self.clock_basis in {\n            'unspecified', 'legacy_pre1960_projection', 'erfa_historical_utc',\n            'skyfield_utc_leap_table'})\n        if self.clock_basis != 'unspecified':\n            require(self.precision == 'computed')")
+          a=s.index("    model = digest({'skyfield':");b=s.index('    ts = Loader',a);s=s[:a]+s[b:]
+          old='            times, indices = almanac.find_discrete(start, end, almanac_east_asia.solar_terms(eph),'
+          new="            # One model identifier covers all epochs; the historical UTC model\n            # is an explicit dependency even when a requested year is modern.\n            model = digest({'skyfield': version('skyfield'), 'builtin_time_assets': assets,\n                            'kernel': manifest.sha256, 'mapping': 'kasi-longitude-v1',\n                            'epsilon_days': 1e-8, 'time_policy': POLICY,\n                            'historical_utc': erfa_identity()})\n"+old
+          assert old in s;s=s.replace(old,new)
+          s=s.replace('                instant = t.utc_datetime()', '                instant, clock_basis = project_solar_time(t)')
+          s=s.replace('manifest.sha256, float(t.tt), model, 1e-8))','manifest.sha256, float(t.tt), model, 1e-8,\n                                             clock_basis=clock_basis))');p.write_text(s)
+          p=r/'src/sazu/term_audit.py';s=p.read_text()
+          s=s.replace("'matched': 0, 'mismatches': [], 'by_year': [],", "'matched': 0, 'mismatches': [], 'by_year': [],\n              'clock_basis_counts': dict(sorted(Counter(e.clock_basis for e in ordered).items())),\n              'clock_review_required': any(e.clock_basis in {\n                  'unspecified', 'legacy_pre1960_projection'} for e in ordered),")
+          p.write_text(s)
+          p=r/'tools/diagnose_term_clocks.py';s=p.read_text()
+          s=s.replace("'minimum_dut1_seconds'", "'minimum_display_shift_seconds'").replace("'maximum_dut1_seconds'", "'maximum_display_shift_seconds'")
+          pos=s.index('\ndef main():')
+          extra='\ndef ut1_display_shift(event, ts) -> float:\n    """Derive UT1 from the original TT event, not from the corrected UTC label.\n\n    Skyfield DUT1 references its own UTC projection, which lacks the pre-1972\n    rubber-second model. Adding it directly to ERFA UTC would double-correct.\n    This datetime is only a coordinate used to compare a display hypothesis.\n    """\n    time = ts.tt_jd(event.tt_jd)\n    projected = time.utc_datetime() + timedelta(seconds=float(time.dut1))\n    return (projected-event.instant_utc).total_seconds()\n\n'
+          s=s[:pos]+extra+s[pos:]
+          s=s.replace('lambda event: float(ts.tt_jd(event.tt_jd).dut1)', 'lambda event: ut1_display_shift(event, ts)');p.write_text(s)
+          p=r/'tools/audit_official_terms.py';s=p.read_text()
+          s=s.replace('from sazu.source_audit import execute_audit', 'from sazu.source_audit import execute_audit\nfrom sazu.utc_history import POLICY, erfa_identity')
+          s=s.replace("'src/sazu/source_audit.py','src/sazu/solar_terms.py','tools/audit_official_terms.py'", "'src/sazu/source_audit.py','src/sazu/solar_terms.py','src/sazu/utc_history.py',\n                  'tools/audit_official_terms.py'")
+          s=s.replace("'environment':{'python':platform.python_version(), 'packages':packages,", "'time_conversion': {'policy': POLICY, 'historical_utc': erfa_identity(),\n            'pre1960': 'legacy_projection_not_historical_utc',\n            'future_utc': 'existing_leap_table_extrapolation_not_prediction'},\n        'environment':{'python':platform.python_version(), 'packages':packages,");p.write_text(s)
+          p=r/'requirements-astro.lock';p.write_text(p.read_text()+'pyerfa==2.0.1.5\n')
+          p=r/'requirements-dev.lock';p.write_text(p.read_text()+'\n# Independent historical UTC regression fixtures\npyerfa==2.0.1.5\nnumpy==2.3.5\n')
+          p=r/'pyproject.toml';p.write_text(p.read_text().replace('"certifi==2026.5.20"]','"certifi==2026.5.20", "pyerfa==2.0.1.5"]'))
+          expected={
+            'src/sazu/utc_history.py':'ae9d156497f727ada521931dc1a2d23e00a354cb9f8637e73ee27013a4ca592a',
+            'tests/test_utc_history.py':'57c38bb96e0d9c7c2845dcbd20c2e78e121125f8b1a99ac764d1b3262bc83a7d',
+            'pyproject.toml':'fd108ad5e269fbc2c5b018243a52ede56491707f626eea7bef49b9457e00f71d',
+            'requirements-astro.lock':'de3498fc5fdda44d59ea1d2e51cae9558a8b463eddda202f12c9d8658b223aad',
+            'requirements-dev.lock':'de5c86a46ce0a443b1d4d262a999c9b546a21d63fb62b786b02d5fd6ed9ce682',
+            'src/sazu/solar_terms.py':'a096fd331cbbdb466c1589ceb1803799cd4acbaee04077b828098f0d221529fa',
+            'src/sazu/term_audit.py':'3df7ca898362e366ed3da67e6f9d5102bb721391b9c19f2d33d5fcbcca5a8607',
+            'tools/audit_official_terms.py':'d211c952c5c6e6ef894a205957b9aa00430ca39f9da294f823f621b82214aa2d',
+            'tools/diagnose_term_clocks.py':'c1debafed2290a12a9b4f4059549eb880128c4c5080dc99445228170420d630c'}
+          for path,sha in expected.items():
+              assert hashlib.sha256(Path(path).read_bytes()).hexdigest()==sha,path
+          print('All nine file hashes match the locally tested implementation.')
+          PY
+      - run: python -m pip install -r requirements-dev.lock -r requirements-astro.lock
+      - run: python -m pip install --no-deps --no-build-isolation -e .
+      - run: python -m ruff check src tests tools && python -m compileall -q src && python -m pytest -q
+      - name: Commit only verified changes to this work branch, remove temporary write workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add pyproject.toml requirements-astro.lock requirements-dev.lock src/sazu/solar_terms.py src/sazu/term_audit.py tools/audit_official_terms.py tools/diagnose_term_clocks.py
+          git rm .github/workflows/utc-integration-import.yml
+          git commit -m 'fix: integrate verified pre-1972 UTC conversion without redefining source clock'
+          git push origin HEAD:fix/solar-term-time-basis-20261022
