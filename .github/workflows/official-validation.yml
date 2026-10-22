@@ -71,7 +71,18 @@ jobs:
               print('BLOCKED: acquisition or execution failed; no numerical result')
           else:
               result=json.loads(path.read_text()); audit=result.get('reference_comparison',{})
-              print(json.dumps({'status':result['status'],'matched':audit.get('matched'),'expected':audit.get('expected'),'mismatch_count':len(audit.get('mismatches',[])),'production_authorized':False}))
+              legacy=audit.get('legacy_comparison')
+              print(json.dumps({
+                  'status':result['status'], 'clock_projection':audit.get('clock_projection'),
+                  'matched':audit.get('matched'), 'expected':audit.get('expected'),
+                  'comparable_count':audit.get('comparable_count'),
+                  'mismatch_count':len(audit.get('mismatches',[])),
+                  'unresolved_count':audit.get('unresolved_count'),
+                  'provisional_mismatch_count':len(audit.get('provisional',{}).get('mismatches',[])) if legacy is not None else None,
+                  'legacy_mismatch_count':len(legacy.get('mismatches',[])) if legacy is not None else None,
+                  'resolved_legacy_mismatch_count':len(audit.get('resolved_legacy_mismatch_keys',[])) if legacy is not None else None,
+                  'remaining_legacy_mismatch_count':len(audit.get('unresolved_legacy_mismatch_keys',[])) if legacy is not None else None,
+                  'production_authorized':False}))
           PY
       - name: Separate clock hypothesis, never changes the failed numerical gate
         if: ${{ always() && steps.acquire.outcome == 'success' }}

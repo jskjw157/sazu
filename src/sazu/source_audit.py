@@ -1,6 +1,6 @@
 """Offline administrative CLI. Never exported through the research HTTP service.
 
-Usage: one JSON request on stdin to ``python -m sazu.source_audit inspect|compare``.
+Usage: one JSON request on stdin to ``python -m sazu.source_audit inspect|compare|compare-legacy``.
 Operator-controlled source parent directories are required. Reports do not contain
 raw source rows, local paths, credentials, or a production authorization flag set true.
 """
@@ -18,6 +18,7 @@ from .serde import canonical_json, parse_request
 from .solar_terms import generate_terms
 from .sources import verify_file
 from .term_audit import compare_term_range, reference_summary
+from .reviewed_term_audit import compare_reviewed_term_range
 
 MAX_REQUEST_BYTES = 65536
 
@@ -59,7 +60,7 @@ def execute_audit(command: str, request: dict) -> dict:
         document = parse_kasi_document(read_reference_bytes(_path(request['path']), manifest), manifest)
         return {'status': 'inspected', 'production_authorized': False,
                 'reference': reference_summary(document)}
-    require(command == 'compare')
+    require(command in ('compare', 'compare-legacy'))
     _fields(request, ('reference_path', 'reference_manifest', 'kernel_path',
                       'kernel_manifest', 'start_year', 'end_year'))
     first, last = request['start_year'], request['end_year']
@@ -77,13 +78,14 @@ def execute_audit(command: str, request: dict) -> dict:
     values = []
     for year in range(first, last+1):
         values.extend(generate_terms(year, kernel_path, kernel_manifest))
-    return compare_term_range(values, document, first, last)
+    comparator = compare_reviewed_term_range if command == 'compare' else compare_term_range
+    return comparator(values, document, first, last)
 
 
 def main(argv=None) -> int:
     try:
         args = list(sys.argv[1:] if argv is None else argv)
-        require(len(args) == 1 and args[0] in ('inspect', 'compare'))
+        require(len(args) == 1 and args[0] in ('inspect', 'compare', 'compare-legacy'))
         raw = sys.stdin.buffer.read(MAX_REQUEST_BYTES+1)
         require(len(raw) <= MAX_REQUEST_BYTES, 'REQUEST_TOO_LARGE')
         report = execute_audit(args[0], parse_request(raw.decode('utf-8')))

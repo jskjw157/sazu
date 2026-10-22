@@ -1,14 +1,14 @@
 """Reviewed TT→UTC projection, separate from solar geometry and KASI matching.
 
 Skyfield's pre-1972 constant TAI-UTC extrapolation is not historical UTC.
-Use ERFA/SOFA's historical UTC drift/steps for 1961–1971. Earlier events
+Use ERFA/SOFA's historical UTC drift/steps for 1960–1971 under the reviewed ERFA/SOFA convention. Earlier events
 retain TT but deliberately have no asserted UTC. Never relabel UT1 as UTC.
 
 Sources: IERS UTC-TAI.history; ERFA/SOFA taiutc/utctai/dat. Future leap
 schedules and independent verification of the solar model remain separate.
 """
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from importlib.metadata import version
 import math
 from pathlib import Path
@@ -18,12 +18,19 @@ from .errors import SazuError, require
 from .serde import digest
 from .solar_terms import SolarTermEvent, generate_terms
 
-POLICY = 'erfa-historical-utc-v1'
-UTC_RULES_REVIEWED_THROUGH = date(2026, 10, 22)
+POLICY = 'erfa-historical-utc-v2-c72'
+UTC_RULES_REVIEWED_AT = date(2026, 10, 22)
+# Compatibility name: a review date is NOT the default offset-validity horizon.
+UTC_RULES_REVIEWED_THROUGH = UTC_RULES_REVIEWED_AT
+UTC_OFFSET_CONFIRMED_THROUGH = date(2026, 12, 31)
+FUTURE_ASSUMPTION_POLICY = 'hold-last-tai-minus-utc-not-confirmed'
+BULLETIN_ID = 'IERS-Bulletin-C-72'
 UTC_CHANGES_SHA256 = '5498bf6298f38b5f63c8f79ea786fc02ffb86df96d6bbf6cf8341e739e7c842f'
-# IERS: at 1961-01-01 00:00 UTC, TAI-UTC = 1.422818 s; TT-TAI = 32.184 s.
-HISTORICAL_UTC_START_JD = 2437300.5
-HISTORICAL_UTC_START_TT_FRACTION = (1.422818 + 32.184) / 86400
+# ERFA dat.c: 1960 coefficient includes drift from reference MJD 37300.
+# At 1960-01-01 (MJD 36934): 1.417818 + (36934-37300)*.001296 = .943482 s.
+# A 5 ms step to the 1961 coefficient is handled by ERFA, not fitted to KASI.
+HISTORICAL_UTC_START_JD = 2436934.5
+HISTORICAL_UTC_START_TT_FRACTION = (.943482 + 32.184) / 86400
 
 
 @dataclass(frozen=True)
@@ -37,10 +44,29 @@ class UtcProjection:
     tt_part2: float
     erfa_status: int | None
     production_authorized: bool = False
+    reviewed_at: date = UTC_RULES_REVIEWED_AT
+    utc_offset_confirmed_through: date = UTC_OFFSET_CONFIRMED_THROUGH
+    bulletin_id: str = BULLETIN_ID
+    future_assumption_policy: str = FUTURE_ASSUMPTION_POLICY
 
 
-def clock_identity(reviewed_through: date) -> dict:
-    require(type(reviewed_through) is date)
+def clock_identity(reviewed_through: date | None = None) -> dict:
+    """Versioned evidence. Optional legacy argument can only restrict the horizon.
+
+    Bulletin C72 is an explicitly reviewed record, not a runtime URL fetch.
+    Its normalized-claims digest is NOT a hash of the original webpage bytes.
+    Dec 31 is a conservative adopted cutoff; no later bulletin is inferred.
+    """
+    effective = UTC_OFFSET_CONFIRMED_THROUGH if reviewed_through is None else reviewed_through
+    require(type(effective) is date
+            and date(1972, 1, 1) <= effective <= UTC_OFFSET_CONFIRMED_THROUGH)
+    bulletin = {
+        'id': BULLETIN_ID, 'issued_on': date(2026, 7, 6),
+        'source_url': 'https://hpiers.obspm.fr/iers/bul/bulc/bulletinc.72',
+        'no_leap_at': date(2026, 12, 31),
+        'tai_minus_utc_seconds': 37,
+        'adopted_confirmed_through': UTC_OFFSET_CONFIRMED_THROUGH,
+    }
     try:
         import erfa
     except ImportError:
@@ -55,29 +81,40 @@ def clock_identity(reviewed_through: date) -> dict:
     return {'policy': POLICY, 'pyerfa': version('pyerfa'),
             'erfa': erfa.version.erfa_version, 'sofa': erfa.version.sofa_version,
             'utc_changes_sha256': digest(changes),
-            'reviewed_through': reviewed_through,
+            'reviewed_at': UTC_RULES_REVIEWED_AT,
+            'reviewed_through': effective,
+            'utc_offset_confirmed_through': UTC_OFFSET_CONFIRMED_THROUGH,
+            'historical_utc_start': date(1960, 1, 1),
+            'historical_convention_source':
+                'https://raw.githubusercontent.com/liberfa/erfa/v2.0.1/src/dat.c',
+            'bulletin': bulletin, 'bulletin_claims_sha256': digest(bulletin),
+            'bulletin_hash_kind': 'normalized-reviewed-claims-not-source-bytes',
+            'future_assumption_policy': FUTURE_ASSUMPTION_POLICY,
+            'historical_step_days': 'not_comparable_erfa_mini_leap_display',
             'source': 'https://hpiers.obspm.fr/iers/bul/bulc/UTC-TAI.history'}
 
 
 def project_tt_to_utc(tt_part1: float, tt_part2: float = 0.0, *,
-                      reviewed_through: date = UTC_RULES_REVIEWED_THROUGH) -> UtcProjection:
+                      reviewed_through: date | None = None) -> UtcProjection:
     """Preserve a split JD. A UTC-looking datetime is NOT automatic approval.
 
-    The review horizon records the reviewed leap-second schedule, not the end
-    of the ephemeris. Positive ERFA status is retained, never silently ignored.
+    The default offset horizon comes from an explicitly reviewed bulletin,
+    not the machine date or ephemeris coverage. ``reviewed_through`` is a legacy
+    optional conservative cap, not permission to extend the bulletin evidence.
+    Positive ERFA status is retained, never silently ignored.
     UTC leap seconds that datetime cannot encode are returned without a value.
     """
     require(all(type(v) in (int, float) and -1e9 < v < 1e9
                 and math.isfinite(v) for v in (tt_part1, tt_part2)))
-    require(type(reviewed_through) is date
-            and date(1972, 1, 1) <= reviewed_through <= UTC_RULES_REVIEWED_THROUGH)
     require(date(1850, 1, 1).toordinal()+1721424.5 <= tt_part1+tt_part2
             < date(2151, 1, 1).toordinal()+1721424.5, 'UNSUPPORTED_RANGE')
     first, second = float(tt_part1), float(tt_part2)
-    model = digest(clock_identity(reviewed_through))
+    identity = clock_identity(reviewed_through)
+    effective = identity['reviewed_through']
+    model = digest(identity)
 
     def result(instant, status, comparable, erfa_status=None):
-        return UtcProjection(instant, status, comparable, model, reviewed_through,
+        return UtcProjection(instant, status, comparable, model, effective,
                              first, second, erfa_status)
 
     if (first-HISTORICAL_UTC_START_JD)+second < HISTORICAL_UTC_START_TT_FRACTION:
@@ -98,10 +135,25 @@ def project_tt_to_utc(tt_part1: float, tt_part2: float = 0.0, *,
         raise SazuError('DATA_INTEGRITY_FAILED') from None
     # Reject a global table change during conversion as well. This module never updates it.
     require(digest(clock_identity(reviewed_through)) == model, 'SOURCE_CONFLICT')
-    if instant.date() > reviewed_through:
+    if instant.date() > effective:
         return result(instant, 'future_utc_assumption', False, status)
     if status:
         return result(instant, 'utc_conversion_warning', False, status)
+    if instant.year < 1972:
+        # SOFA's quasi-JD includes pre-1972 mini-leaps, while d2dtf formats
+        # only >0.5-second jumps as leap seconds. Do not claim exact historical
+        # civil labels on these transition days or invent a fitted correction.
+        next_day = instant.date() + timedelta(days=1)
+        dat0, s0 = erfa.ufunc.dat(instant.year, instant.month, instant.day, 0.0)
+        dat12, s12 = erfa.ufunc.dat(instant.year, instant.month, instant.day, 0.5)
+        dat24, s24 = erfa.ufunc.dat(next_day.year, next_day.month, next_day.day, 0.0)
+        require(min(int(s0), int(s12), int(s24)) >= 0, 'DATA_INTEGRITY_FAILED')
+        if max(int(s0), int(s12), int(s24)):
+            return result(instant, 'utc_conversion_warning', False,
+                          max(int(s0), int(s12), int(s24)))
+        jump = float(dat24 - (2.0*dat12-dat0))
+        if abs(jump) > 1e-9:  # Table arithmetic noise only, not a term tolerance.
+            return result(instant, 'historical_utc_step_day', False, status)
     return result(instant, 'historical_utc' if instant.year < 1972 else 'modern_utc', True, status)
 
 

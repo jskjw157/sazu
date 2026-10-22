@@ -15,7 +15,7 @@ import stat
 from sazu.contracts import strict_int
 from sazu.errors import SazuError, require
 from sazu.serde import canonical_json, parse_request, digest
-from sazu.term_clock import project_tt_to_utc, clock_identity, UTC_RULES_REVIEWED_THROUGH
+from sazu.term_clock import project_tt_to_utc, clock_identity
 
 PROBE_SHA256 = '5c33bcb86f9ad8aa59a128994860fa52f32883d490c8bce1da1c2a7fdfe1025f'
 BASELINE_SHA256 = '1d775590cab5d641429f12188043ebbfe8579b680a557eb727c2a22e119a8b82'
@@ -90,14 +90,14 @@ def summarize_rows(rows: list[dict]) -> dict:
         counts['new_mismatches'] += int(old_match and not matched)
     names = ('baseline_matched','baseline_mismatched','comparable_matched',
              'comparable_mismatched','historical_clock_unresolved','future_utc_assumption',
-             'utc_conversion_warning','leap_second_unrepresentable',
+             'utc_conversion_warning','leap_second_unrepresentable','historical_utc_step_day',
              'blocked_original_mismatches','new_mismatches')
     return {'status':'blocked', 'production_authorized':False, 'total':len(rows),
             **{key:counts[key] for key in names},
             'minute_cell':'[-30,30) seconds from reference display',
             'fixed_original_mismatches':len(fixed), 'fixed_cases':fixed,
             'remaining_comparable_mismatches':remaining,
-            'clock_identity':clock_identity(UTC_RULES_REVIEWED_THROUGH),
+            'clock_identity':clock_identity(),
             'evidence_basis':'replay_of_prior_audit_not_new_official_acquisition',
             'limitation':'Clock conversion repaired; historical convention, future schedule, '
                          'remaining model differences and production approval are not resolved.'}

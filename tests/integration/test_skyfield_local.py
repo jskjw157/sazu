@@ -47,11 +47,13 @@ def test_reviewed_generator_and_cli_keep_clock_status(tmp_path):
       'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp',
       expected_hash,kernel.stat().st_size,datetime(2026,10,22,tzinfo=UTC),date(1850,1,1),date(2149,1,1),
       'TDB','computed','unreviewed','https://naif.jpl.nasa.gov/naif/rules.html',('jpl-de440s',),'v1')
-    for year,status in ((1950,'historical_clock_unresolved'),(1965,'historical_utc'),
-                        (2020,'modern_utc'),(2040,'future_utc_assumption')):
+    for year,status in ((1950,'historical_clock_unresolved'),(1960,'historical_utc'),
+                        (1965,'historical_utc'),(2020,'modern_utc'),
+                        (2026,'modern_utc'),(2040,'future_utc_assumption')):
         terms=generate_reviewed_terms(year,kernel,m)
         assert len(terms)==24 and {t.kasi_id for t in terms}==set(range(1,25))
         assert all(t.clock.status==status and not t.production_authorized for t in terms)
+        assert all(t.clock.bulletin_id=='IERS-Bulletin-C-72' for t in terms)
         if year==1950:
             assert all(t.clock.instant_utc is None for t in terms)
         else:
