@@ -38,12 +38,12 @@ def diagnose_clocks(candidate, document, first: int, last: int, offset_seconds) 
                   '1972_through_2025' if value.event_year <= 2025 else '2026_through_2050')
         bucket = periods.setdefault(period, {'period': period, 'total': 0,
             'baseline_matched': 0, 'ut1_hypothesis_matched': 0,
-            'minimum_dut1_seconds': shift, 'maximum_dut1_seconds': shift})
+            'minimum_display_shift_seconds': shift, 'maximum_display_shift_seconds': shift})
         bucket['total'] += 1
         bucket['baseline_matched'] += baseline
         bucket['ut1_hypothesis_matched'] += hypothesis
-        bucket['minimum_dut1_seconds'] = min(bucket['minimum_dut1_seconds'], shift)
-        bucket['maximum_dut1_seconds'] = max(bucket['maximum_dut1_seconds'], shift)
+        bucket['minimum_display_shift_seconds'] = min(bucket['minimum_display_shift_seconds'], shift)
+        bucket['maximum_display_shift_seconds'] = max(bucket['maximum_display_shift_seconds'], shift)
         if baseline != hypothesis:
             changed.append([value.event_year, value.kasi_id])
     total = len(ordered)
@@ -58,6 +58,18 @@ def diagnose_clocks(candidate, document, first: int, last: int, offset_seconds) 
         'ut1_display_hypothesis': {'total': total, 'matched': hypothesis, 'mismatched': total-hypothesis},
         'periods': list(periods.values()), 'changed_keys': sorted(changed),
         'note': 'No fitted correction, tolerance relaxation, reference edits or operational model changes.'}
+
+
+def ut1_display_shift(event, ts) -> float:
+    """Derive UT1 from the original TT event, not from the corrected UTC label.
+
+    Skyfield DUT1 references its own UTC projection, which lacks the pre-1972
+    rubber-second model. Adding it directly to ERFA UTC would double-correct.
+    This datetime is only a coordinate used to compare a display hypothesis.
+    """
+    time = ts.tt_jd(event.tt_jd)
+    projected = time.utc_datetime() + timedelta(seconds=float(time.dut1))
+    return (projected-event.instant_utc).total_seconds()
 
 
 def main():
@@ -75,7 +87,7 @@ def main():
     from skyfield.api import load
     ts = load.timescale(builtin=True)
     report = diagnose_clocks(candidates, reference, 1920, 2050,
-                             lambda event: float(ts.tt_jd(event.tt_jd).dut1))
+                             lambda event: ut1_display_shift(event, ts))
     report['experiment_model'] = 'Skyfield builtin DUT1 at the same computed TT event'
     report['limitations'] = ['UT1 is not UTC.', 'Source clock interpretation remains unconfirmed.',
                             'This diagnostic cannot authorize a production release.']

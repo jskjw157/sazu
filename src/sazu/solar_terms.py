@@ -12,6 +12,7 @@ from .contracts import SourceManifest, strict_int, utc_datetime, valid_hash, val
 from .errors import SazuError, require
 from .serde import digest
 from .sources import verify_file
+from .utc_history import POLICY, erfa_identity, project_solar_time
 
 FIXED_KST = timezone(timedelta(hours=9))
 _NAMES = ('입춘 우수 경칩 춘분 청명 곡우 입하 소만 망종 하지 소서 대서 '
@@ -47,6 +48,7 @@ class SolarTermEvent:
     model_id: str | None = None
     numerical_tolerance_days: float | None = None
     physical_uncertainty: str = 'unknown'
+    clock_basis: str = 'unspecified'
 
     def __post_init__(self):
         require(strict_int(self.event_year, 1919, 2051) and strict_int(self.kasi_id, 1, 24))
@@ -70,6 +72,11 @@ class SolarTermEvent:
         else:
             require(self.tt_jd is None and self.model_id is None)
         require(self.physical_uncertainty == 'unknown')
+        require(type(self.clock_basis) is str and self.clock_basis in {
+            'unspecified', 'legacy_pre1960_projection', 'erfa_historical_utc',
+            'skyfield_utc_leap_table'})
+        if self.clock_basis != 'unspecified':
+            require(self.precision == 'computed')
 
 
 def normalize_reference_record(record, manifest: SourceManifest) -> SolarTermEvent:
@@ -145,9 +152,6 @@ def generate_terms(year: int, kernel_path: Path, manifest: SourceManifest) -> tu
     assets = {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
               for p in root.iterdir() if p.name.endswith(('.npy', '.npz', '.data'))}
     require(bool(assets), 'SOURCE_NOT_AVAILABLE')
-    model = digest({'skyfield': version('skyfield'), 'builtin_time_assets': assets,
-                    'kernel': manifest.sha256, 'mapping': 'kasi-longitude-v1',
-                    'epsilon_days': 1e-8})
     ts = Loader(str(Path(kernel_path).parent)).timescale(builtin=True)
     low = datetime(year, 1, 1, tzinfo=FIXED_KST).astimezone(UTC)
     high = datetime(year+1, 1, 1, tzinfo=FIXED_KST).astimezone(UTC)
@@ -158,18 +162,25 @@ def generate_terms(year: int, kernel_path: Path, manifest: SourceManifest) -> tu
             require({s.target for s in relevant} >= {3, 10, 399}, 'DATA_INTEGRITY_FAILED')
             require(all(s.start_jd <= float(start.tdb) and float(end.tdb) <= s.end_jd
                         for s in relevant), 'UNSUPPORTED_RANGE')
+            # One model identifier covers all epochs; the historical UTC model
+            # is an explicit dependency even when a requested year is modern.
+            model = digest({'skyfield': version('skyfield'), 'builtin_time_assets': assets,
+                            'kernel': manifest.sha256, 'mapping': 'kasi-longitude-v1',
+                            'epsilon_days': 1e-8, 'time_policy': POLICY,
+                            'historical_utc': erfa_identity()})
             times, indices = almanac.find_discrete(start, end, almanac_east_asia.solar_terms(eph),
                                                  epsilon=1e-8)
             events = []
             for t, index in zip(times, indices):
-                instant = t.utc_datetime()
+                instant, clock_basis = project_solar_time(t)
                 if not low <= instant < high:
                     continue
                 identifier = ((int(index)*15-315) % 360)//15+1
                 term = TERMS[identifier-1]
                 events.append(SolarTermEvent(year, identifier, term.name, term.longitude, instant,
                                              None, 'computed', None, None, manifest.source_id,
-                                             manifest.sha256, float(t.tt), model, 1e-8))
+                                             manifest.sha256, float(t.tt), model, 1e-8,
+                                             clock_basis=clock_basis))
             return validate_annual_terms(events, year)
     except SazuError:
         raise
