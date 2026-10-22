@@ -1,0 +1,30 @@
+name: clock-policy-workspace
+on:
+  push:
+    branches: [fix/reviewed-clock-policy-20261022]
+permissions:
+  contents: read
+jobs:
+  workspace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.5'
+      - name: Export tracked code and pinned public test dependencies only
+        run: |
+          mkdir -p "$RUNNER_TEMP/clock-policy/wheels"
+          git archive --format=tar HEAD > "$RUNNER_TEMP/clock-policy/source.tar"
+          git rev-parse HEAD > "$RUNNER_TEMP/clock-policy/commit.txt"
+          python -m pip download --no-deps --only-binary=:all: -d "$RUNNER_TEMP/clock-policy/wheels" skyfield==1.55 jplephem==2.24 sgp4==2.27 pyerfa==2.0.1.5 ruff==0.14.10
+          (cd "$RUNNER_TEMP/clock-policy" && sha256sum source.tar wheels/* > SHA256SUMS)
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: clock-policy-workspace
+          path: ${{ runner.temp }}/clock-policy/
+          retention-days: 1
+          if-no-files-found: error
