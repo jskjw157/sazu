@@ -19,53 +19,51 @@ jobs:
         with:
           python-version: '3.13.5'
       - run: |
-          python -m pip install -r requirements-dev.lock -r requirements-astro.lock
+          python -m pip install -r requirements-dev.lock -r requirements-astro.lock pyerfa==2.0.1.5
           python -m pip install --no-deps --no-build-isolation -e .
+          mkdir -p "$RUNNER_TEMP/erfa-wheel"
+          python -m pip download --no-deps --only-binary=:all: pyerfa==2.0.1.5 -d "$RUNNER_TEMP/erfa-wheel"
           curl --proto '=https' --fail --silent --show-error --max-time 90 --max-filesize 1048576 https://astro.kasi.re.kr/kor/almanac/solarTerms/download -o "$RUNNER_TEMP/kasi.txt"
           curl --proto '=https' --fail --silent --show-error --max-time 120 --max-filesize 67108864 https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp -o "$RUNNER_TEMP/de440s.bsp"
-      - name: Diagnostic only, no fitted corrections or gate changes
+      - name: Historical UTC diagnostic; no automatic adoption
         run: |
           python - <<'PY'
-          import json,os,hashlib
+          import json,os,warnings
           from pathlib import Path
           from datetime import datetime,UTC
-          from statistics import mean
-          from skyfield.api import load,load_file
-          from skyfield.framelib import ecliptic_frame
+          from skyfield.api import load
+          import erfa
           from sazu.cli import _manifest
           from sazu.kasi_reference import parse_kasi_document,reference_events
           from sazu.solar_terms import generate_terms
           from tools.audit_official_terms import build_request
-          root=Path(os.environ['RUNNER_TEMP'])
-          req=build_request(root/'kasi.txt',root/'de440s.bsp',datetime.now(UTC),1920,2050)
+          root=Path(os.environ['RUNNER_TEMP']); req=build_request(root/'kasi.txt',root/'de440s.bsp',datetime.now(UTC),1920,2050)
           doc=parse_kasi_document((root/'kasi.txt').read_bytes(),_manifest(req['reference_manifest']))
           refs={(e.event_year,e.kasi_id):e for e in reference_events(doc,1920,2050)}
-          ts=load.timescale(builtin=True); eph=load_file(str(root/'de440s.bsp'))
           rows=[]
-          try:
-              for year in range(1920,2051):
-                  for e in generate_terms(year,root/'de440s.bsp',_manifest(req['kernel_manifest'])):
-                      t=ts.tt_jd(e.tt_jd)
-                      delta=(e.instant_utc-refs[year,e.kasi_id].instant_utc).total_seconds()
-                      def longitude(jd):
-                          v=eph['earth'].at(ts.tt_jd(jd)).observe(eph['sun']).apparent()
-                          return float(v.frame_latlon(ecliptic_frame)[1].degrees)
-                      angle=(longitude(e.tt_jd)-e.longitude+180)%360-180
-                      rate=((longitude(e.tt_jd+1/86400)-longitude(e.tt_jd-1/86400)+180)%360-180)/2
-                      full_nutation_shift=-angle/rate
-                      rows.append({'year':year,'term':e.kasi_id,'delta':delta,'dut1':float(t.dut1),'delta_t':float(t.delta_t),'tt_minus_utc':float(t.delta_t+t.dut1),'full_nutation_shift':full_nutation_shift})
-          finally:eph.close()
+          for year in range(1960,2051):
+              for e in generate_terms(year,root/'de440s.bsp',_manifest(req['kernel_manifest'])):
+                  whole=float(int(e.tt_jd)); fraction=e.tt_jd-whole
+                  with warnings.catch_warnings(record=True) as records:
+                      warnings.simplefilter('always',erfa.ErfaWarning)
+                      tai=erfa.tttai(whole,fraction); utc=erfa.taiutc(*tai)
+                      y,m,d,hms=erfa.d2dtf('UTC',6,*utc)
+                  converted=datetime(int(y),int(m),int(d),int(hms['h']),int(hms['m']),int(hms['s']),int(hms['f']),tzinfo=UTC)
+                  delta=(converted-refs[year,e.kasi_id].instant_utc).total_seconds()
+                  rows.append({'year':year,'term':e.kasi_id,'delta_seconds':delta,'changed_seconds':(converted-e.instant_utc).total_seconds(),'erfa_warning':bool(records)})
           summary=[]
-          for start,end in [(1920,1959),(1960,1971),(1972,2025),(2026,2050)]:
-              rs=[r for r in rows if start<=r['year']<=end]
-              summary.append({'range':[start,end],'count':len(rs),'mean_delta':mean(r['delta'] for r in rs),'min_delta':min(r['delta'] for r in rs),'max_delta':max(r['delta'] for r in rs),'utc_matches':sum(-30<=r['delta']<30 for r in rs),'ut1_matches':sum(-30<=r['delta']+r['dut1']<30 for r in rs),'full_nutation_utc_matches':sum(-30<=r['delta']+r['full_nutation_shift']<30 for r in rs),'full_nutation_ut1_matches':sum(-30<=r['delta']+r['dut1']+r['full_nutation_shift']<30 for r in rs),'maximum_abs_nutation_shift':max(abs(r['full_nutation_shift']) for r in rs)})
-          result={'status':'diagnostic_only','production_authorized':False,'summary':summary,'rows':rows,'reference_sha256':doc.manifest.sha256,'kernel_sha256':hashlib.sha256((root/'de440s.bsp').read_bytes()).hexdigest()}
-          (root/'clock-contributions.json').write_text(json.dumps(result,separators=(',',':'))+'\n')
+          for a,b in [(1960,1971),(1972,2025),(2026,2050)]:
+              rs=[r for r in rows if a<=r['year']<=b]
+              summary.append({'period':[a,b],'total':len(rs),'matched':sum(-30<=r['delta_seconds']<30 for r in rs),'mismatched':sum(not -30<=r['delta_seconds']<30 for r in rs),'min_delta':min(r['delta_seconds'] for r in rs),'max_delta':max(r['delta_seconds'] for r in rs),'warnings':sum(r['erfa_warning'] for r in rs)})
+          result={'adopted':False,'production_authorized':False,'erfa_version':erfa.__version__,'summary':summary,'rows':rows}
+          (root/'erfa-historical-diagnostic.json').write_text(json.dumps(result,separators=(',',':'))+'\n')
           print(json.dumps(summary))
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: clock-contributions
-          path: ${{ runner.temp }}/clock-contributions.json
+          name: erfa-historical-diagnostic
+          path: |
+            ${{ runner.temp }}/erfa-historical-diagnostic.json
+            ${{ runner.temp }}/erfa-wheel/*.whl
           retention-days: 30
           if-no-files-found: error
