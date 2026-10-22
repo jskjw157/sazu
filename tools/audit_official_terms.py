@@ -15,6 +15,7 @@ from sazu.kasi_reference import KASI_URL
 from sazu.serde import canonical_json, digest, parse_request
 from sazu.solar_terms import generate_terms
 from sazu.source_audit import execute_audit
+from sazu.utc_history import POLICY, erfa_identity
 
 KASI_SHA256 = '508761248c7d18eb1ca1bcb1fcace2ba29f3f511d085321ae1e633c74d8e9e34'
 KERNEL_SHA256 = 'c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2'
@@ -55,9 +56,13 @@ def run_audit(kasi: Path, kernel: Path, acquired_at: datetime,
     packages = {name:version(name) for name in
                 ('skyfield','jplephem','sgp4','numpy','korean-lunar-calendar','tzdata')}
     code_paths = ('src/sazu/kasi_reference.py','src/sazu/term_audit.py',
-                  'src/sazu/source_audit.py','src/sazu/solar_terms.py','tools/audit_official_terms.py')
+                  'src/sazu/source_audit.py','src/sazu/solar_terms.py','src/sazu/utc_history.py',
+                  'tools/audit_official_terms.py')
     output = {'status':comparison['status'], 'production_authorized':False,
         'reference_comparison':comparison, 'auxiliary_years':auxiliary,
+        'time_conversion': {'policy': POLICY, 'historical_utc': erfa_identity(),
+            'pre1960': 'legacy_projection_not_historical_utc',
+            'future_utc': 'existing_leap_table_extrapolation_not_prediction'},
         'environment':{'python':platform.python_version(), 'packages':packages,
             'code_sha256':{p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in code_paths}},
         'uncompleted_gates':[

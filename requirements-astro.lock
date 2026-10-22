@@ -4,3 +4,4 @@ jplephem==2.24
 sgp4==2.27
 numpy==2.3.5
 certifi==2026.5.20
+pyerfa==2.0.1.5

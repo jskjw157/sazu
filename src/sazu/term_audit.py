@@ -43,6 +43,9 @@ def compare_term_range(candidate, document: KasiDocument, start_year: int, end_y
               'candidate_count': len(ordered), 'candidate_sha256': digest(ordered),
               'reference': reference_summary(document), 'candidate_identities': [],
               'matched': 0, 'mismatches': [], 'by_year': [],
+              'clock_basis_counts': dict(sorted(Counter(e.clock_basis for e in ordered).items())),
+              'clock_review_required': any(e.clock_basis in {
+                  'unspecified', 'legacy_pre1960_projection'} for e in ordered),
               'missing_candidate_keys': [list(k) for k in sorted(expected_keys-counts.keys())],
               'extra_candidate_keys': [list(k) for k in sorted(counts.keys()-expected_keys)],
               'duplicate_candidate_keys': [list(k) for k in sorted(k for k,n in counts.items() if n > 1)],
