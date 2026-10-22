@@ -18,9 +18,9 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.13.5'
-      - name: Apply only the exact locally tested patch
+      - name: Apply exact tested patch; no numeric threshold changes
         run: |
           python - <<'PY'
           import base64, zlib, hashlib, pathlib, subprocess
-          encoded='eNq9W21z20aS/q5fMed8ILAEYQJ8V8KtaG1lz3uO7LKUvUqpVKghMBRhgwAPGFhiUv7v190zAAEQoGTverUbmpiXnumefnm6MQzC9ZoNBvehZPzlbr9Lk4/Cl7ZMthFbNRrOwjgQj2y9GIkVD2x75U7c6VAwZzicjsdng8HgiMZZv98/pvPzz2zgjFkf/oOvGyl3bMluX6x5JvkuXC6HtuPObfeFxV7kn0M/SWNsG8/t4Yu7swGMSpM42e5pUvZpvw5FFCyXjjDIGyJOAs4LMyNXJbZozmnTiMqFfXX'
+          encoded='eNq9W21z20aS/q5fMed8ILAEYQJ8V8KtaG1lz3uO7LKUvUqpVKghMBRhgwAPGFhiUv7v190zAAEQoGTverUbmpiXnumefnm6MQzC9ZoNBvehZPzlbr9Lk4/Cl7ZMthFbNRrOwjgQj2y9GIkVD2x75U7c6VAwZzicjsdng8HgiMZZv98/pvPzz2zgjFkf/oOvGyl3bMluX6x5JvkuXC6HtuPObfeFxV7kn0M/SWNsG8/t4Yu7swGMSpM42e5pUvZpvw5FFCyXjjgXX'
           PY
