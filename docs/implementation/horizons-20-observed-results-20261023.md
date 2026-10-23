@@ -23,6 +23,8 @@
 | 해당 Horizons 관례의 추정 오프셋을 기존 Skyfield/KASI 표시 차이에 더한 반올림 셀 | 20/20 KASI 분 셀 **안에 들어간다는 진단**. 이것은 원래 승인 데이터의 20건을 해소한 것으로 집계하지 않음 |
 | 기존 검증 게이트 | `production_authorized=false`, 미해결 **289건** 유지 |
 
+**NASA JPL Horizons 공식 설명서의 추가 단서:** Horizons는 IAU76/80에서 IAU2006/00A로 변경하면 지구 true-of-date 좌표계의 적경 원점 방향이 약 **−53 milliarcsec** 달라질 수 있다고 적고 있다. 이번 **−46~−50 mas** 황경 차이와 규모가 가깝다. 이는 서로 다른 좌표 프레임이 현재 분 차이를 설명할 수 있다는 *외부의 정량 근거*이나, 같은 구성으로 계산된 완전한 원인 증명은 아니다. 참조: https://ssd.jpl.nasa.gov/horizons/manual.html 의 `Earth true equator and equinox of date (TOD)`와 `31. Observer ecliptic longitude & latitude`.
+
 **보간 오프셋은 모델/좌표 관례 의존 값이다.** 실제 천문 사건에 1.14초 오차가 있었다고 주장할 수 없다. 동일 ICRF 기하 위치에서는 거의 차이가 없지만, 겉보기 황경 좌표 변환/세차장동·광행차·빛 굴절 조건 등 추가 차이를 분리해야 한다.
 
 ## 20개 사건의 세부 진단
