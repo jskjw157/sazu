@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "evidence": "archived_hash_verified_tt_replay_not_independent_event_solution",
+  "research_only": true,
+  "production_authorized": false,
+  "base_probe_sha256": "5c33bcb86f9ad8aa59a128994860fa52f32883d490c8bce1da1c2a7fdfe1025f",
+  "tt_representation": "jd_tt_float_from_archived_skyfield_1_55_DE440s_calculation",
+  "reference_case_catalog": "data/verification/modern_20_naoj_cases_20261023.json",
+  "epochs": [
+    {
+      "year": 1962,
+      "kasi_term_id": 3,
+      "tt_jd": 2437729.5625434765
+    },
+    {
+      "year": 1972,
+      "kasi_term_id": 12,
+      "tt_jd": 2441521.252233039
+    },
+    {
+      "year": 1972,
+      "kasi_term_id": 13,
+      "tt_jd": 2441536.936948118
+    },
+    {
+      "year": 1975,
+      "kasi_term_id": 23,
+      "tt_jd": 2442418.4710136736
+    },
+    {
+      "year": 1976,
+      "kasi_term_id": 20,
+      "tt_jd": 2443104.6821378917
+    },
+    {
+      "year": 1980,
+      "kasi_term_id": 3,
+      "tt_jd": 2444303.9287111205
+    },
+    {
+      "year": 1981,
+      "kasi_term_id": 19,
+      "tt_jd": 2444916.006504277
+    },
+    {
+      "year": 1988,
+      "kasi_term_id": 23,
+      "tt_jd": 2447166.628079217
+    },
+    {
+      "year": 1989,
+      "kasi_term_id": 2,
+      "tt_jd": 2447576.1815519948
+    },
+    {
+      "year": 1990,
+      "kasi_term_id": 16,
+      "tt_jd": 2448157.789200824
+    },
+    {
+      "year": 1996,
+      "kasi_term_id": 24,
+      "tt_jd": 2450103.287166368
+    },
+    {
+      "year": 1999,
+      "kasi_term_id": 16,
+      "tt_jd": 2451444.9809486293
+    },
+    {
+      "year": 2001,
+      "kasi_term_id": 3,
+      "tt_jd": 2451974.0233063926
+    },
+    {
+      "year": 2007,
+      "kasi_term_id": 17,
+      "tt_jd": 2454382.1754013975
+    },
+    {
+      "year": 2009,
+      "kasi_term_id": 11,
+      "tt_jd": 2455019.4684685175
+    },
+    {
+      "year": 2010,
+      "kasi_term_id": 19,
+      "tt_jd": 2455508.0302780624
+    },
+    {
+      "year": 2013,
+      "kasi_term_id": 17,
+      "tt_jd": 2456573.6247305176
+    },
+    {
+      "year": 2014,
+      "kasi_term_id": 2,
+      "tt_jd": 2456707.250427494
+    },
+    {
+      "year": 2018,
+      "kasi_term_id": 20,
+      "tt_jd": 2458444.876841709
+    },
+    {
+      "year": 2024,
+      "kasi_term_id": 20,
+      "tt_jd": 2460636.3317007776
+    }
+  ]
+}
