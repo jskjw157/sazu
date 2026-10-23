@@ -1,6 +1,5 @@
 """JPL EOP2 must stay a provenance-checked research source, not an ephemeris fix."""
 from pathlib import Path
-import math
 import pytest
 
 from tools import jpl_eop2_epoch_audit as a
