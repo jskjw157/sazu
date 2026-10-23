@@ -35,7 +35,7 @@ def compare_term_range(candidate, document: KasiDocument, start_year: int, end_y
     ordered = sorted(candidate, key=lambda e: (e.event_year, e.kasi_id, canonical_json(e)))
     expected_keys = {(y, i) for y in range(start_year, end_year+1) for i in range(1, 25)}
     counts = Counter((e.event_year, e.kasi_id) for e in ordered)
-    report = {'schema_version': 1, 'status': 'blocked', 'production_authorized': False,
+    report = {'schema_version': 2, 'status': 'blocked', 'production_authorized': False,
               'evidence_level': 'published_reference_numerical_comparison',
               'physical_source_independence': 'not_established',
               'comparison_policy': 'nearest-minute-half-up-v1',
@@ -43,6 +43,7 @@ def compare_term_range(candidate, document: KasiDocument, start_year: int, end_y
               'candidate_count': len(ordered), 'candidate_sha256': digest(ordered),
               'reference': reference_summary(document), 'candidate_identities': [],
               'matched': 0, 'mismatches': [], 'by_year': [],
+              'unresolved_clock_keys': [], 'provisional_clock_keys': [],
               'missing_candidate_keys': [list(k) for k in sorted(expected_keys-counts.keys())],
               'extra_candidate_keys': [list(k) for k in sorted(counts.keys()-expected_keys)],
               'duplicate_candidate_keys': [list(k) for k in sorted(k for k,n in counts.items() if n > 1)],
@@ -75,6 +76,12 @@ def compare_term_range(candidate, document: KasiDocument, start_year: int, end_y
             if key not in unique:
                 continue
             ref, computed = references[key], unique[key]
+            if computed.instant_utc is None or computed.event_year < 1960:
+                report['unresolved_clock_keys'].append(list(key))
+                continue
+            if (computed.utc_projection is not None
+                    and computed.utc_projection.status == 'utc_future_assumption'):
+                report['provisional_clock_keys'].append(list(key))
             if compare_reference(ref, computed.instant_utc) == 'match':
                 matched += 1
             else:
@@ -86,7 +93,11 @@ def compare_term_range(candidate, document: KasiDocument, start_year: int, end_y
         report['by_year'].append({'year': year, 'matched': matched, 'mismatched': mismatched})
     errors = ('missing_candidate_keys', 'extra_candidate_keys', 'duplicate_candidate_keys',
               'invalid_annual_structure', 'mismatches')
-    report['status'] = 'failed' if any(report[k] for k in errors) else 'passed'
+    if report['unresolved_clock_keys']:
+        report['blockers'].append('REFERENCE_CLOCK_UNRESOLVED_BEFORE_1960_OR_LEAP_SECOND')
+    report['status'] = ('failed' if any(report[k] for k in errors) else
+                        'blocked' if report['blockers'] else 'passed')
+    report['numerically_compared'] = report['matched']+len(report['mismatches'])
     return _finish(report)
 
 

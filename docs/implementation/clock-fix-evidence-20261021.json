@@ -1,0 +1,63 @@
+{
+  "status": "partially_fixed_reference_gate_still_failed",
+  "tested_commit": "a817a70f25fc1e5238e3157061bf394e5a5bcfbb",
+  "issue": 5,
+  "pull_request": 6,
+  "production_authorized": false,
+  "main_merged": false,
+  "deployed": false,
+  "commercial_fortune_api_called": false,
+  "clock_policy": "sofa-utc-v2",
+  "tt_roots_unchanged": true,
+  "reference_values_unchanged": true,
+  "rounding_cell_unchanged": true,
+  "original_mismatches": 314,
+  "resolved_original_mismatches": 25,
+  "unresolved_original_mismatches": 289,
+  "unresolved_original_breakdown": {
+    "before_1960_clock_semantics": 257,
+    "remaining_numerical_disagreements_1960_2050": 32
+  },
+  "full_period_accounting": {
+    "expected_events": 3144,
+    "numerical_matches": 2152,
+    "numerical_mismatches": 32,
+    "clock_unresolved_events": 960,
+    "conditional_future_events_in_numerical_comparison": 576,
+    "missing_keys": 0,
+    "extra_keys": 0,
+    "duplicate_keys": 0
+  },
+  "tests": {
+    "python": {"passed": 355, "skipped": 1, "failed": 0, "duration_seconds": 4.56, "run_id": 39583136603, "job_id": 119165377652},
+    "ruff": "passed",
+    "compileall": "passed",
+    "service_boundary": {"run_id": 39583287506, "unit_and_process": "success", "compose_integration": "success"},
+    "full_period_numeric_gate": {"run_id": 39583136603, "job_id": 119165605522, "conclusion": "failure"},
+    "independent_code_review": "not_performed"
+  },
+  "artifacts": {
+    "run_id": 39583136603,
+    "artifact_id": 12338306822,
+    "zip_sha256": "be2556d58884e3f260cab66fd27436c6e98eeeb2277b7e6ae5a4de0e7be5fce1",
+    "json_sha256": "ba56f868a141b91fded7e1fd16e2335ba5560c733c4b16e3246c2934c2975456",
+    "reported_payload_sha256": "c4a1b61c015b47147d97aca441212ba73b27c988bf3b5dfb8791b4ca0f1aa8c8"
+  },
+  "source_version_discrepancy": {
+    "event": "2024 소설",
+    "annual_web_document": "https://astro.kasi.re.kr/life/post/calendardata",
+    "annual_publication_status": "preliminary_not_officially_promulgated",
+    "annual_generated_at_local": "2023-04-25T22:44",
+    "annual_display_fixed_utc_plus_9": "2024-11-22T04:56",
+    "long_range_txt_version": "2026-09-01",
+    "long_range_display_fixed_utc_plus_9": "2024-11-22T04:57",
+    "computed_display_fixed_utc_plus_9": "2024-11-22T04:56:29.763188",
+    "reference_replaced": false,
+    "other_mismatches_explained_by_this_case": false
+  },
+  "primary_references": [
+    "https://raw.githubusercontent.com/liberfa/erfa/master/src/dat.c",
+    "https://datacenter.iers.org/data/html/bulletinc-072.html",
+    "https://astro.kasi.re.kr/life/post/calendardata"
+  ]
+}
