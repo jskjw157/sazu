@@ -1,0 +1,49 @@
+name: horizons-eop2-source-research
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/horizons-eop2-source-research.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect-jpl-eop2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Fetch JPL EOP2 long (research input only)
+        run: |
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
+            --retry 1 --max-time 60 --max-filesize 6710886 \
+            https://eop2-external.jpl.nasa.gov/eop2/latest_eop2.long \
+            -o "$RUNNER_TEMP/jpl-eop2.long"
+          sha256sum "$RUNNER_TEMP/jpl-eop2.long"
+      - name: Describe source format and version without publishing raw EOP
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, pathlib, datetime
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'jpl-eop2.long'
+          b=p.read_bytes()
+          if len(b) > 6710886 or len(b) < 100000:
+              raise RuntimeError('unexpected public EOP size')
+          txt=b.decode('ascii')
+          lines=txt.splitlines()
+          report={'status':'research_only','production_authorized':False,
+                  'source':'https://eop2-external.jpl.nasa.gov/eop2/latest_eop2.long',
+                  'sha256':hashlib.sha256(b).hexdigest(),
+                  'bytes':len(b),'line_count':len(lines),
+                  'retrieved_at_utc':datetime.datetime.now(datetime.UTC).isoformat(),
+                  'header_lines':lines[:8],
+                  'first_data_representative':lines[8:11],
+                  'last_line':lines[-1][:200]}
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          output=pathlib.Path(os.environ['RUNNER_TEMP'])/'jpl-eop2-provenance.json'
+          output.write_text(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: jpl-eop2-provenance-only
+          path: ${{ runner.temp }}/jpl-eop2-provenance.json
+          if-no-files-found: warn
+          retention-days: 14
