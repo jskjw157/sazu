@@ -13,7 +13,7 @@ from __future__ import annotations
 import argparse
 from bisect import bisect_right
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 import hashlib
 import json
 import math
@@ -91,8 +91,11 @@ def parse_eop2(text: str) -> tuple[tuple[EopRow, ...], dict]:
             raise EopEvidenceError("Unexpected EOP2 day index/date")
         try:
             datetime.fromisoformat(date_text)
-        except ValueError as exc:
+            expected_day = (datetime(1858, 11, 17) + timedelta(days=int(mjd))).date().isoformat()
+        except (ValueError, OverflowError) as exc:
             raise EopEvidenceError("Invalid EOP2 calendar label") from exc
+        if date_text != expected_day:
+            raise EopEvidenceError("EOP2 MJD(TAI) and printed date disagree")
         if prev_mjd is not None and mjd != prev_mjd + 1:
             raise EopEvidenceError("EOP2 missing or duplicate MJD(TAI) date")
         prev_mjd = mjd
