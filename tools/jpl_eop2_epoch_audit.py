@@ -124,6 +124,8 @@ def load_verified_source(path: Path, *, expected_sha256: str) -> tuple[tuple[Eop
     """Never trust a path based on its file extension; verify bytes before parsing."""
     if not isinstance(path, Path) or type(expected_sha256) is not str or not _DIGEST.fullmatch(expected_sha256):
         raise EopEvidenceError("Missing pinned source identity")
+    if expected_sha256 != SHA_FROZEN_OCT22:
+        raise EopEvidenceError("Unreviewed EOP2 snapshot: explicit release update required")
     fd = None
     try:
         flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
