@@ -1,5 +1,4 @@
 """Tests for an explicit research-only JPL Horizons diagnostic (no live network)."""
-from datetime import datetime
 import json
 from pathlib import Path
 
@@ -131,3 +130,41 @@ def test_no_network_get_in_tests_and_reject_non_horizons_url():
     with pytest.raises(hp.ProbeError):
         hp.validate_url('https://example.com/api/horizons.api')
     assert hp.validate_url('https://ssd.jpl.nasa.gov/api/horizons.api') is None
+
+
+def test_chunked_horizons_queries_preserve_all_60_tt_samples(monkeypatch):
+    jds=[2460000.0+i/1000.0 for i in range(60)]
+    batches=[]
+    def fake_fetch(query):
+        values=[float(v.strip("\"'")) for v in query['TLIST'].split(',')]
+        assert len(values)<=9
+        assert query['TIME_TYPE']=='TT'
+        batches.append(values)
+        header='Observer quantity #31 ObsEcLon ObsEcLat\n$$SOE\n'
+        rows=''.join(f'{jd:.9f}, , 240.00000000, 0.00,\n' for jd in values)
+        return header+rows+'$$EOE\n','a'*64
+    monkeypatch.setattr(hp,'fetch_horizons',fake_fetch)
+    values,evidence=hp.fetch_and_parse_batched('observer',jds)
+    assert len(values)==len(jds)==60
+    assert len(evidence)==7
+    assert sum(d['count'] for d in evidence)==60
+    assert [v for batch in batches for v in batch]==pytest.approx(jds,abs=1e-8)
+
+
+def test_chunked_vector_query_rejects_missing_row_and_preserves_tdb(monkeypatch):
+    jds=[2460000.0+i/1000.0 for i in range(20)]
+    def fake_fetch(query):
+        vals=[float(v.strip("\"'")) for v in query['TLIST'].split(',')]
+        assert query['TIME_TYPE']=='TDB'
+        text='ICRF frame\n$$SOE\n'
+        for j in vals:
+            text+=f'{j:.9f} = A.D. 2023-Jan-01 (TDB)\n X = 1.0E+00 Y = 0.0E+00 Z = 0.0E+00\n'
+        return text+'$$EOE\n','b'*64
+    monkeypatch.setattr(hp,'fetch_horizons',fake_fetch)
+    values,evidence=hp.fetch_and_parse_batched('vector',jds)
+    assert len(values)==20 and len(evidence)==3
+    assert all(v==(1.,0.,0.) for v in values)
+    def missing(_):return 'ICRF frame\n$$SOE\n$$EOE\n','b'*64
+    monkeypatch.setattr(hp,'fetch_horizons',missing)
+    with pytest.raises(hp.ProbeError):
+        hp.fetch_and_parse_batched('vector',jds)
