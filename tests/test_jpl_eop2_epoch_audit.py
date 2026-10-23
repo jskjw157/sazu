@@ -48,6 +48,7 @@ def test_tai_mjd_conversion_and_interpolation_are_not_utc_or_ut1():
     SAMPLE.replace("IAU 2006/2000A","IAU 1976/1980"),
     SAMPLE.replace("60001.0", "60000.0"),
     SAMPLE.replace("60001.0", "60003.0"),
+    SAMPLE.replace("2023-02-26", "2023-02-28"),
     SAMPLE.replace("0.3, 0.1", "NaN, 0.1"),
     SAMPLE.replace("$END", ""),
 ])
