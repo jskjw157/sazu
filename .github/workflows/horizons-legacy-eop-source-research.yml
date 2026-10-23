@@ -1,0 +1,46 @@
+name: horizons-legacy-eop-source-research
+on:
+  pull_request:
+    paths: ['.github/workflows/horizons-legacy-eop-source-research.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect-original-jpl-eop:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Acquire JPL legacy EOP candidate explicitly (not runtime)
+        run: |
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
+            --retry 1 --max-time 60 --max-filesize 10000000 \
+            https://keof.jpl.nasa.gov/predictions/latest_midnight.eop \
+            -o "$RUNNER_TEMP/jpl-eop-legacy.eop"
+          sha256sum "$RUNNER_TEMP/jpl-eop-legacy.eop"
+      - name: Inspect schema, times and provenance without publishing raw dataset
+        run: |
+          python - <<'PY'
+          import os, pathlib, hashlib, json, datetime
+          path=pathlib.Path(os.environ['RUNNER_TEMP'])/'jpl-eop-legacy.eop'
+          data=path.read_bytes()
+          if not 1024 < len(data) < 10000000:
+              raise RuntimeError('EOP size unexpected')
+          txt=data.decode('ascii')
+          lines=txt.splitlines()
+          report={'status':'research_only','production_authorized':False,
+              'url':'https://keof.jpl.nasa.gov/predictions/latest_midnight.eop',
+              'sha256':hashlib.sha256(data).hexdigest(),'size':len(data),
+              'line_count':len(lines),'retrieved_at_utc':datetime.datetime.now(datetime.UTC).isoformat(),
+              'header':lines[:24], 'mid_sample':lines[len(lines)//2:len(lines)//2+2],
+              'last_lines':lines[-4:]}
+          print(json.dumps(report,indent=2))
+          (pathlib.Path(os.environ['RUNNER_TEMP'])/'jpl-eop-legacy-provenance.json').write_text(
+              json.dumps(report,indent=2))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: jpl-legacy-eop-provenance-only
+          path: ${{ runner.temp }}/jpl-eop-legacy-provenance.json
+          if-no-files-found: warn
+          retention-days: 14
