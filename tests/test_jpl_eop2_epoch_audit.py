@@ -91,6 +91,10 @@ def test_secure_local_source_rejects_wrong_sha_and_symlink(tmp_path):
     file.write_text(SAMPLE)
     with pytest.raises(a.EopEvidenceError):
         a.load_verified_source(file, expected_sha256="0"*64)
+    # A caller-chosen checksum is not an approved snapshot, even if its bytes match.
+    import hashlib
+    with pytest.raises(a.EopEvidenceError):
+        a.load_verified_source(file, expected_sha256=hashlib.sha256(SAMPLE.encode()).hexdigest())
     alias = tmp_path / 'eop2-symlink'
     alias.symlink_to(file)
     with pytest.raises(a.EopEvidenceError):
