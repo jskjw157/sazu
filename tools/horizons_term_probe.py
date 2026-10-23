@@ -221,6 +221,27 @@ def parse_vectors(raw: str, expected: list[float]) -> list[tuple[float,float,flo
     return vectors
 
 
+def fetch_and_parse_batched(kind: str, jds: list[float]) -> tuple[list, list[dict]]:
+    """Bound Horizons URL size, preserve all results and query identities."""
+    _finite_jds(jds)
+    if kind not in ('observer','vector'):
+        raise ProbeError('Unsupported Horizons mode')
+    values, evidence = [], []
+    for start in range(0, len(jds), 9):
+        batch = jds[start:start+9]
+        query = make_query(kind, batch)
+        raw, sha256 = fetch_horizons(query)
+        parsed = parse_observer(raw,batch) if kind == 'observer' else parse_vectors(raw,batch)
+        if len(parsed) != len(batch):
+            raise ProbeError('Incomplete Horizons batch')
+        values.extend(parsed)
+        evidence.append({'kind':kind,'count':len(batch),'sha256':sha256,
+                         'header':raw.split('$SOE')[0][-2500:], 'query':query})
+    if len(values) != len(jds):
+        raise ProbeError('Incomplete Horizons result')
+    return values, evidence
+
+
 def delta_degrees(a: float,b: float) -> float:
     return (a-b+180.0)%360.0-180.0
 
@@ -322,16 +343,11 @@ def main(argv=None)->int:
         obs_times=[e.tt_jd+offset/86400 for e in epochs for offset in
                    (-HALF_WINDOW_SECONDS,0.0,HALF_WINDOW_SECONDS)]
         vector_times=[p['tdb_jd'] for p in local]
-        observer,obs_hash=fetch_horizons(make_query('observer',obs_times))
-        vector,vec_hash=fetch_horizons(make_query('vector',vector_times))
-        obs_lons=parse_observer(observer,obs_times)
-        vec=parse_vectors(vector,vector_times)
+        obs_lons,obs_batches=fetch_and_parse_batched('observer',obs_times)
+        vec,vec_batches=fetch_and_parse_batched('vector',vector_times)
         obs_groups=[obs_lons[i*3:(i+1)*3] for i in range(len(epochs))]
-        meta={'horizons_api':API_URL,'obs_query':make_query('observer',obs_times),
-              'vec_query':make_query('vector',vector_times),
-              'observer_sha256':obs_hash,'vector_sha256':vec_hash,
-              'observer_header':observer.split('$$SOE')[0][-2500:],
-              'vector_header':vector.split('$$SOE')[0][-2500:],
+        meta={'horizons_api':API_URL,'observer_batches':obs_batches,
+              'vector_batches':vec_batches,
               'base_probe_sha256':ARCHIVED_PROBE_SHA256,
               'local_kernel_sha256':JPL_DE440S_SHA256,
               'skyfield_version':'1.55',
