@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "research_only": true,
+  "production_authorized": false,
+  "release_approval": "BLOCKED",
+  "source_report_sha256": "d74e7d75a53280f8578f4450130f7646562d53cb6502cb4af8976136e2e4f245",
+  "source_ci_run": "https://github.com/jskjw157/sazu/actions/runs/39895321098",
+  "jpl_horizons_model": "DE441",
+  "skyfield_kernel_sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2",
+  "source_description": "20 center TT event measurements in historical JPL Horizons quantity31 output; not frame-identical to Skyfield 2000B",
+  "rows": [
+    {
+      "year": 1962,
+      "kasi_term_id": 3,
+      "tt_jd": 2437729.5625434765,
+      "horizons_obs_ecliptic_lon_deg": 344.999987,
+      "skyfield_2000b_ecliptic_lon_deg": 345.0000000006904
+    },
+    {
+      "year": 1972,
+      "kasi_term_id": 12,
+      "tt_jd": 2441521.252233039,
+      "horizons_obs_ecliptic_lon_deg": 119.999987,
+      "skyfield_2000b_ecliptic_lon_deg": 120.00000000184538
+    },
+    {
+      "year": 1972,
+      "kasi_term_id": 13,
+      "tt_jd": 2441536.936948118,
+      "horizons_obs_ecliptic_lon_deg": 134.999987,
+      "skyfield_2000b_ecliptic_lon_deg": 135.00000000141935
+    },
+    {
+      "year": 1975,
+      "kasi_term_id": 23,
+      "tt_jd": 2442418.4710136736,
+      "horizons_obs_ecliptic_lon_deg": 284.999987,
+      "skyfield_2000b_ecliptic_lon_deg": 285.00000000496345
+    },
+    {
+      "year": 1976,
+      "kasi_term_id": 20,
+      "tt_jd": 2443104.6821378917,
+      "horizons_obs_ecliptic_lon_deg": 239.9999871,
+      "skyfield_2000b_ecliptic_lon_deg": 240.0000000001409
+    },
+    {
+      "year": 1980,
+      "kasi_term_id": 3,
+      "tt_jd": 2444303.9287111205,
+      "horizons_obs_ecliptic_lon_deg": 344.9999866,
+      "skyfield_2000b_ecliptic_lon_deg": 345.0000000013884
+    },
+    {
+      "year": 1981,
+      "kasi_term_id": 19,
+      "tt_jd": 2444916.006504277,
+      "horizons_obs_ecliptic_lon_deg": 224.9999867,
+      "skyfield_2000b_ecliptic_lon_deg": 225.00000000334592
+    },
+    {
+      "year": 1988,
+      "kasi_term_id": 23,
+      "tt_jd": 2447166.628079217,
+      "horizons_obs_ecliptic_lon_deg": 284.9999868,
+      "skyfield_2000b_ecliptic_lon_deg": 285.00000000106945
+    },
+    {
+      "year": 1989,
+      "kasi_term_id": 2,
+      "tt_jd": 2447576.1815519948,
+      "horizons_obs_ecliptic_lon_deg": 329.9999867,
+      "skyfield_2000b_ecliptic_lon_deg": 330.0000000038828
+    },
+    {
+      "year": 1990,
+      "kasi_term_id": 16,
+      "tt_jd": 2448157.789200824,
+      "horizons_obs_ecliptic_lon_deg": 179.9999867,
+      "skyfield_2000b_ecliptic_lon_deg": 180.0000000051929
+    },
+    {
+      "year": 1996,
+      "kasi_term_id": 24,
+      "tt_jd": 2450103.287166368,
+      "horizons_obs_ecliptic_lon_deg": 299.9999869,
+      "skyfield_2000b_ecliptic_lon_deg": 300.00000000002177
+    },
+    {
+      "year": 1999,
+      "kasi_term_id": 16,
+      "tt_jd": 2451444.9809486293,
+      "horizons_obs_ecliptic_lon_deg": 179.9999869,
+      "skyfield_2000b_ecliptic_lon_deg": 180.0000000005379
+    },
+    {
+      "year": 2001,
+      "kasi_term_id": 3,
+      "tt_jd": 2451974.0233063926,
+      "horizons_obs_ecliptic_lon_deg": 344.9999862,
+      "skyfield_2000b_ecliptic_lon_deg": 345.00000000190386
+    },
+    {
+      "year": 2007,
+      "kasi_term_id": 17,
+      "tt_jd": 2454382.1754013975,
+      "horizons_obs_ecliptic_lon_deg": 194.9999867,
+      "skyfield_2000b_ecliptic_lon_deg": 195.00000000304226
+    },
+    {
+      "year": 2009,
+      "kasi_term_id": 11,
+      "tt_jd": 2455019.4684685175,
+      "horizons_obs_ecliptic_lon_deg": 104.9999867,
+      "skyfield_2000b_ecliptic_lon_deg": 105.00000000557606
+    },
+    {
+      "year": 2010,
+      "kasi_term_id": 19,
+      "tt_jd": 2455508.0302780624,
+      "horizons_obs_ecliptic_lon_deg": 224.9999868,
+      "skyfield_2000b_ecliptic_lon_deg": 225.00000000348186
+    },
+    {
+      "year": 2013,
+      "kasi_term_id": 17,
+      "tt_jd": 2456573.6247305176,
+      "horizons_obs_ecliptic_lon_deg": 194.9999867,
+      "skyfield_2000b_ecliptic_lon_deg": 195.0000000004061
+    },
+    {
+      "year": 2014,
+      "kasi_term_id": 2,
+      "tt_jd": 2456707.250427494,
+      "horizons_obs_ecliptic_lon_deg": 329.9999868,
+      "skyfield_2000b_ecliptic_lon_deg": 330.0000000020533
+    },
+    {
+      "year": 2018,
+      "kasi_term_id": 20,
+      "tt_jd": 2458444.876841709,
+      "horizons_obs_ecliptic_lon_deg": 239.9999868,
+      "skyfield_2000b_ecliptic_lon_deg": 240.00000000050477
+    },
+    {
+      "year": 2024,
+      "kasi_term_id": 20,
+      "tt_jd": 2460636.3317007776,
+      "horizons_obs_ecliptic_lon_deg": 239.9999873,
+      "skyfield_2000b_ecliptic_lon_deg": 240.00000000292616
+    }
+  ]
+}
