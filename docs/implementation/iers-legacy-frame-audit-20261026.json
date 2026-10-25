@@ -1,0 +1,886 @@
+{
+  "schema_version": 1,
+  "status": "diagnostic_only",
+  "research_only": true,
+  "production_authorized": false,
+  "release_approval": "BLOCKED",
+  "horizons_frame_reproduced": false,
+  "newly_resolved_case_count": 0,
+  "existing_unresolved_case_count": 289,
+  "source": {
+    "url": "https://maia.usno.navy.mil/ser7/finals.all",
+    "source_sha256": "d1e3293efcb2a4bc2a39b8aa73279e6d04ace357f1cd51eb7df5bac36bc727d7",
+    "size_bytes": 3773912,
+    "row_count": 20074,
+    "frame": "IAU1976/1980",
+    "columns": "Bulletin A dPsi/dEps only",
+    "unit": "mas",
+    "argument": "MJD(UTC)",
+    "first_mjd_utc": 41684.0,
+    "last_mjd_utc": 61757.0,
+    "horizons_snapshot_equivalence": false,
+    "url_is_mutable": true
+  },
+  "epoch_count": 20,
+  "sampled_count": 17,
+  "unavailable_count": 3,
+  "prediction_bracket_count": 3,
+  "numerical_projection_executed": true,
+  "precision_limit": "Frozen Horizons floats lie on a 1e-7 degree grid (0.36 mas); raw output tokens and rounding policy were not preserved. Residual digits are diagnostics, not physical accuracy bounds.",
+  "assumptions": [
+    "PR12 no additional ICRF-to-dynamical-J2000 bias",
+    "IAU1976 precession; IAU1980 nutation plus Bulletin A dPsi/dEps",
+    "same corrected obliquity in nutation and ecliptic projection",
+    "linear daily UTC interpolation; not JPL interpolation"
+  ],
+  "samples": [
+    {
+      "year": 1962,
+      "kasi_term_id": 3,
+      "tt_jd": 2437729.5625434765,
+      "horizons_obs_ecliptic_lon_deg": 344.999987,
+      "skyfield_2000b_ecliptic_lon_deg": 345.0000000006904,
+      "mjd_utc": 37729.06214877956,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "status": "unavailable",
+      "reason": "outside_source_range"
+    },
+    {
+      "year": 1972,
+      "kasi_term_id": 12,
+      "tt_jd": 2441521.252233039,
+      "horizons_obs_ecliptic_lon_deg": 119.999987,
+      "skyfield_2000b_ecliptic_lon_deg": 120.00000000184538,
+      "mjd_utc": 41520.75173322431,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "status": "unavailable",
+      "reason": "outside_source_range"
+    },
+    {
+      "year": 1972,
+      "kasi_term_id": 13,
+      "tt_jd": 2441536.936948118,
+      "horizons_obs_ecliptic_lon_deg": 134.999987,
+      "skyfield_2000b_ecliptic_lon_deg": 135.00000000141935,
+      "mjd_utc": 41536.436448302986,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "status": "unavailable",
+      "reason": "outside_source_range"
+    },
+    {
+      "year": 1975,
+      "kasi_term_id": 23,
+      "tt_jd": 2442418.4710136736,
+      "horizons_obs_ecliptic_lon_deg": 284.999987,
+      "skyfield_2000b_ecliptic_lon_deg": 285.00000000496345,
+      "mjd_utc": 42417.970479136544,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        42417.0,
+        42418.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "P",
+        "P"
+      ],
+      "prediction_in_bracket": true,
+      "dpsi_mas": 39.22960154534165,
+      "deps_mas": 1.1923542503614735,
+      "endpoint_offsets_mas": [
+        [
+          39.348,
+          1.204
+        ],
+        [
+          39.226,
+          1.192
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.5,
+          0.3
+        ],
+        [
+          0.5,
+          0.3
+        ]
+      ],
+      "raw_iau76_80_deg": 284.99997559257827,
+      "alternative_iau1980_cpo_deg": 284.99998648968983,
+      "alternative_minus_raw_mas": 39.22960154534165,
+      "horizons_minus_raw_mas": 41.06671815407026,
+      "horizons_minus_alternative_mas": 1.8371165197095252
+    },
+    {
+      "year": 1976,
+      "kasi_term_id": 20,
+      "tt_jd": 2443104.6821378917,
+      "horizons_obs_ecliptic_lon_deg": 239.9999871,
+      "skyfield_2000b_ecliptic_lon_deg": 240.0000000001409,
+      "mjd_utc": 43104.181591780536,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        43104.0,
+        43105.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "P",
+        "P"
+      ],
+      "prediction_in_bracket": true,
+      "dpsi_mas": 27.268574660310847,
+      "deps_mas": -0.8913010274329862,
+      "endpoint_offsets_mas": [
+        [
+          27.292,
+          -0.914
+        ],
+        [
+          27.163,
+          -0.789
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.5,
+          0.3
+        ],
+        [
+          0.5,
+          0.3
+        ]
+      ],
+      "raw_iau76_80_deg": 239.99997888825808,
+      "alternative_iau1980_cpo_deg": 239.99998646286215,
+      "alternative_minus_raw_mas": 27.268574660310847,
+      "horizons_minus_raw_mas": 29.562270890437503,
+      "horizons_minus_alternative_mas": 2.293696240940335
+    },
+    {
+      "year": 1980,
+      "kasi_term_id": 3,
+      "tt_jd": 2444303.9287111205,
+      "horizons_obs_ecliptic_lon_deg": 344.9999866,
+      "skyfield_2000b_ecliptic_lon_deg": 345.0000000013884,
+      "mjd_utc": 44303.4281187131,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        44303.0,
+        44304.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "P",
+        "P"
+      ],
+      "prediction_in_bracket": true,
+      "dpsi_mas": 9.941350905313854,
+      "deps_mas": -1.6160898894324929,
+      "endpoint_offsets_mas": [
+        [
+          10.003,
+          -1.566
+        ],
+        [
+          9.859,
+          -1.683
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.5,
+          0.3
+        ],
+        [
+          0.5,
+          0.3
+        ]
+      ],
+      "raw_iau76_80_deg": 344.99998321180914,
+      "alternative_iau1980_cpo_deg": 344.9999859732955,
+      "alternative_minus_raw_mas": 9.941350905313854,
+      "horizons_minus_raw_mas": 12.197487103549065,
+      "horizons_minus_alternative_mas": 2.256136167488876
+    },
+    {
+      "year": 1981,
+      "kasi_term_id": 19,
+      "tt_jd": 2444916.006504277,
+      "horizons_obs_ecliptic_lon_deg": 224.9999867,
+      "skyfield_2000b_ecliptic_lon_deg": 225.00000000334592,
+      "mjd_utc": 44915.505900295284,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        44915.0,
+        44916.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": 6.1421903345482205,
+      "deps_mas": -1.4132447622036561,
+      "endpoint_offsets_mas": [
+        [
+          6.083,
+          -1.478
+        ],
+        [
+          6.2,
+          -1.35
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          1.982,
+          0.868
+        ],
+        [
+          1.982,
+          0.868
+        ]
+      ],
+      "raw_iau76_80_deg": 224.9999861326661,
+      "alternative_iau1980_cpo_deg": 224.99998783883007,
+      "alternative_minus_raw_mas": 6.1421903345482205,
+      "horizons_minus_raw_mas": 2.0424020362952433,
+      "horizons_minus_alternative_mas": -4.099788259281922
+    },
+    {
+      "year": 1988,
+      "kasi_term_id": 23,
+      "tt_jd": 2447166.628079217,
+      "horizons_obs_ecliptic_lon_deg": 284.9999868,
+      "skyfield_2000b_ecliptic_lon_deg": 285.00000000106945,
+      "mjd_utc": 47166.12742893915,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        47166.0,
+        47167.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": -2.6299895613130646,
+      "deps_mas": 2.8414319897037643,
+      "endpoint_offsets_mas": [
+        [
+          -2.683,
+          2.845
+        ],
+        [
+          -2.267,
+          2.817
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.582,
+          0.311
+        ],
+        [
+          0.646,
+          0.285
+        ]
+      ],
+      "raw_iau76_80_deg": 284.9999870120712,
+      "alternative_iau1980_cpo_deg": 284.99998628151855,
+      "alternative_minus_raw_mas": -2.6299895613130646,
+      "horizons_minus_raw_mas": -0.7634563189640176,
+      "horizons_minus_alternative_mas": 1.8665331936063012
+    },
+    {
+      "year": 1989,
+      "kasi_term_id": 2,
+      "tt_jd": 2447576.1815519948,
+      "horizons_obs_ecliptic_lon_deg": 329.9999867,
+      "skyfield_2000b_ecliptic_lon_deg": 330.0000000038828,
+      "mjd_utc": 47575.68090171698,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        47575.0,
+        47576.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": -2.0276583587924835,
+      "deps_mas": 0.05939148845261662,
+      "endpoint_offsets_mas": [
+        [
+          -2.044,
+          -0.055
+        ],
+        [
+          -2.02,
+          0.113
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          1.044,
+          0.16
+        ],
+        [
+          1.039,
+          0.145
+        ]
+      ],
+      "raw_iau76_80_deg": 329.9999872601733,
+      "alternative_iau1980_cpo_deg": 329.9999866969349,
+      "alternative_minus_raw_mas": -2.0276583587924835,
+      "horizons_minus_raw_mas": -2.016623898271064,
+      "horizons_minus_alternative_mas": 0.011034398994524963
+    },
+    {
+      "year": 1990,
+      "kasi_term_id": 16,
+      "tt_jd": 2448157.789200824,
+      "horizons_obs_ecliptic_lon_deg": 179.9999867,
+      "skyfield_2000b_ecliptic_lon_deg": 180.0000000051929,
+      "mjd_utc": 48157.28853897237,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        48157.0,
+        48158.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": -15.981730873825363,
+      "deps_mas": -2.4432925655354483,
+      "endpoint_offsets_mas": [
+        [
+          -16.053,
+          -2.428
+        ],
+        [
+          -15.806,
+          -2.481
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.523,
+          0.298
+        ],
+        [
+          0.395,
+          0.298
+        ]
+      ],
+      "raw_iau76_80_deg": 179.99999112106457,
+      "alternative_iau1980_cpo_deg": 179.99998668169488,
+      "alternative_minus_raw_mas": -15.981730873825363,
+      "horizons_minus_raw_mas": -15.91583246636219,
+      "horizons_minus_alternative_mas": 0.06589841632376192
+    },
+    {
+      "year": 1996,
+      "kasi_term_id": 24,
+      "tt_jd": 2450103.287166368,
+      "horizons_obs_ecliptic_lon_deg": 299.9999869,
+      "skyfield_2000b_ecliptic_lon_deg": 300.00000000002177,
+      "mjd_utc": 50102.786446645994,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        50102.0,
+        50103.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": -30.04424431248576,
+      "deps_mas": -5.348497117447165,
+      "endpoint_offsets_mas": [
+        [
+          -30.012,
+          -5.505
+        ],
+        [
+          -30.053,
+          -5.306
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.791,
+          0.298
+        ],
+        [
+          0.791,
+          0.298
+        ]
+      ],
+      "raw_iau76_80_deg": 299.9999951713048,
+      "alternative_iau1980_cpo_deg": 299.9999868256814,
+      "alternative_minus_raw_mas": -30.04424431248576,
+      "horizons_minus_raw_mas": -29.776697306260758,
+      "horizons_minus_alternative_mas": 0.2675470341273467
+    },
+    {
+      "year": 1999,
+      "kasi_term_id": 16,
+      "tt_jd": 2451444.9809486293,
+      "horizons_obs_ecliptic_lon_deg": 179.9999869,
+      "skyfield_2000b_ecliptic_lon_deg": 180.0000000005379,
+      "mjd_utc": 51444.480205758955,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        51444.0,
+        51445.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": -56.63441489740749,
+      "deps_mas": -6.882948560261255,
+      "endpoint_offsets_mas": [
+        [
+          -56.693,
+          -7.003
+        ],
+        [
+          -56.571,
+          -6.753
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.248,
+          0.298
+        ],
+        [
+          0.248,
+          0.298
+        ]
+      ],
+      "raw_iau76_80_deg": 180.00000265994802,
+      "alternative_iau1980_cpo_deg": 179.9999869281661,
+      "alternative_minus_raw_mas": -56.63441489740749,
+      "horizons_minus_raw_mas": -56.735812847819034,
+      "horizons_minus_alternative_mas": -0.10139790447283303
+    },
+    {
+      "year": 2001,
+      "kasi_term_id": 3,
+      "tt_jd": 2451974.0233063926,
+      "horizons_obs_ecliptic_lon_deg": 344.9999862,
+      "skyfield_2000b_ecliptic_lon_deg": 345.00000000190386,
+      "mjd_utc": 51973.52256352223,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        51973.0,
+        51974.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": -52.25100910193517,
+      "deps_mas": -4.1307239296246845,
+      "endpoint_offsets_mas": [
+        [
+          -52.135,
+          -3.975
+        ],
+        [
+          -52.357,
+          -4.273
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.412,
+          0.34
+        ],
+        [
+          0.412,
+          0.34
+        ]
+      ],
+      "raw_iau76_80_deg": 345.0000007917028,
+      "alternative_iau1980_cpo_deg": 344.9999862775336,
+      "alternative_minus_raw_mas": -52.25100910193517,
+      "horizons_minus_raw_mas": -52.53013000583451,
+      "horizons_minus_alternative_mas": -0.2791208544294932
+    },
+    {
+      "year": 2007,
+      "kasi_term_id": 17,
+      "tt_jd": 2454382.1754013975,
+      "horizons_obs_ecliptic_lon_deg": 194.9999867,
+      "skyfield_2000b_ecliptic_lon_deg": 195.00000000304226,
+      "mjd_utc": 54381.67464695307,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        54381.0,
+        54382.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": -66.52392266133558,
+      "deps_mas": -5.1340270305628,
+      "endpoint_offsets_mas": [
+        [
+          -66.615,
+          -5.329
+        ],
+        [
+          -66.48,
+          -5.04
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.138,
+          0.115
+        ],
+        [
+          0.116,
+          0.34
+        ]
+      ],
+      "raw_iau76_80_deg": 195.00000492742544,
+      "alternative_iau1980_cpo_deg": 194.99998644855802,
+      "alternative_minus_raw_mas": -66.52392266133558,
+      "horizons_minus_raw_mas": -65.61873159398601,
+      "horizons_minus_alternative_mas": 0.905191109268344
+    },
+    {
+      "year": 2009,
+      "kasi_term_id": 11,
+      "tt_jd": 2455019.4684685175,
+      "horizons_obs_ecliptic_lon_deg": 104.9999867,
+      "skyfield_2000b_ecliptic_lon_deg": 105.00000000557606,
+      "mjd_utc": 55018.96770249901,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        55018.0,
+        55019.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": -65.9435143149544,
+      "deps_mas": -9.3917428425228,
+      "endpoint_offsets_mas": [
+        [
+          -65.899,
+          -9.414
+        ],
+        [
+          -65.945,
+          -9.391
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.326,
+          0.34
+        ],
+        [
+          0.301,
+          0.34
+        ]
+      ],
+      "raw_iau76_80_deg": 105.00000494851986,
+      "alternative_iau1980_cpo_deg": 104.99998663087699,
+      "alternative_minus_raw_mas": -65.9435143149544,
+      "horizons_minus_raw_mas": -65.69467151393837,
+      "horizons_minus_alternative_mas": 0.24884286631277064
+    },
+    {
+      "year": 2010,
+      "kasi_term_id": 19,
+      "tt_jd": 2455508.0302780624,
+      "horizons_obs_ecliptic_lon_deg": 224.9999868,
+      "skyfield_2000b_ecliptic_lon_deg": 225.00000000348186,
+      "mjd_utc": 55507.529512043926,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        55507.0,
+        55508.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": -69.98269806057377,
+      "deps_mas": -8.122932452178445,
+      "endpoint_offsets_mas": [
+        [
+          -70.024,
+          -8.169
+        ],
+        [
+          -69.946,
+          -8.082
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.74,
+          0.34
+        ],
+        [
+          0.74,
+          0.34
+        ]
+      ],
+      "raw_iau76_80_deg": 225.00000631480177,
+      "alternative_iau1980_cpo_deg": 224.99998687516342,
+      "alternative_minus_raw_mas": -69.98269806057377,
+      "horizons_minus_raw_mas": -70.25328640111184,
+      "horizons_minus_alternative_mas": -0.2705883389353403
+    },
+    {
+      "year": 2013,
+      "kasi_term_id": 17,
+      "tt_jd": 2456573.6247305176,
+      "horizons_obs_ecliptic_lon_deg": 194.9999867,
+      "skyfield_2000b_ecliptic_lon_deg": 195.0000000004061,
+      "mjd_utc": 56573.12395292503,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        56573.0,
+        56574.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": -88.12617760466617,
+      "deps_mas": -11.999130633453488,
+      "endpoint_offsets_mas": [
+        [
+          -88.162,
+          -11.985
+        ],
+        [
+          -87.873,
+          -12.099
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.224,
+          0.073
+        ],
+        [
+          0.204,
+          0.073
+        ]
+      ],
+      "raw_iau76_80_deg": 195.00001082552674,
+      "alternative_iau1980_cpo_deg": 194.99998634603295,
+      "alternative_minus_raw_mas": -88.12617760466617,
+      "horizons_minus_raw_mas": -86.85189629886736,
+      "horizons_minus_alternative_mas": 1.274281339647132
+    },
+    {
+      "year": 2014,
+      "kasi_term_id": 2,
+      "tt_jd": 2456707.250427494,
+      "horizons_obs_ecliptic_lon_deg": 329.9999868,
+      "skyfield_2000b_ecliptic_lon_deg": 330.0000000020533,
+      "mjd_utc": 56706.749649901234,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        56706.0,
+        56707.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": -80.1774782938765,
+      "deps_mas": -10.920762253456807,
+      "endpoint_offsets_mas": [
+        [
+          -80.131,
+          -10.947
+        ],
+        [
+          -80.193,
+          -10.912
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.513,
+          0.088
+        ],
+        [
+          0.185,
+          0.058
+        ]
+      ],
+      "raw_iau76_80_deg": 330.00000920401226,
+      "alternative_iau1980_cpo_deg": 329.9999869324905,
+      "alternative_minus_raw_mas": -80.1774782938765,
+      "horizons_minus_raw_mas": -80.6544441729784,
+      "horizons_minus_alternative_mas": -0.47696589717816096
+    },
+    {
+      "year": 2018,
+      "kasi_term_id": 20,
+      "tt_jd": 2458444.876841709,
+      "horizons_obs_ecliptic_lon_deg": 239.9999868,
+      "skyfield_2000b_ecliptic_lon_deg": 240.00000000050477,
+      "mjd_utc": 58444.37604096828,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        58444.0,
+        58445.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": -108.91708648417364,
+      "deps_mas": -7.69690198136888,
+      "endpoint_offsets_mas": [
+        [
+          -108.931,
+          -7.642
+        ],
+        [
+          -108.894,
+          -7.788
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          0.758,
+          0.097
+        ],
+        [
+          0.758,
+          0.097
+        ]
+      ],
+      "raw_iau76_80_deg": 240.00001692534448,
+      "alternative_iau1980_cpo_deg": 239.99998667059825,
+      "alternative_minus_raw_mas": -108.91708648417364,
+      "horizons_minus_raw_mas": -108.45124018032948,
+      "horizons_minus_alternative_mas": 0.4658462671613961
+    },
+    {
+      "year": 2024,
+      "kasi_term_id": 20,
+      "tt_jd": 2460636.3317007776,
+      "horizons_obs_ecliptic_lon_deg": 239.9999873,
+      "skyfield_2000b_ecliptic_lon_deg": 240.00000000292616,
+      "mjd_utc": 60635.83090003689,
+      "production_authorized": false,
+      "interpolation": "research_linear_MJD_UTC_not_JPL_algorithm",
+      "bracket_mjd_utc": [
+        60635.0,
+        60636.0
+      ],
+      "status": "sampled",
+      "nutation_flags": [
+        "I",
+        "I"
+      ],
+      "prediction_in_bracket": false,
+      "dpsi_mas": -114.0086277904824,
+      "deps_mas": -7.434289590556174,
+      "endpoint_offsets_mas": [
+        [
+          -114.223,
+          -7.647
+        ],
+        [
+          -113.965,
+          -7.391
+        ]
+      ],
+      "endpoint_sigma_mas": [
+        [
+          1.103,
+          0.084
+        ],
+        [
+          1.103,
+          0.084
+        ]
+      ],
+      "raw_iau76_80_deg": 240.00001874039208,
+      "alternative_iau1980_cpo_deg": 239.9999870713288,
+      "alternative_minus_raw_mas": -114.0086277904824,
+      "horizons_minus_raw_mas": -113.18541153286787,
+      "horizons_minus_alternative_mas": 0.8232162599597359
+    }
+  ],
+  "local_model": {
+    "kernel_sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2",
+    "skyfield_version": "1.55",
+    "pyerfa_version": "2.0.1.5",
+    "model": "unadjusted-iau1976-1980",
+    "horizons_eop_corrections_included": false
+  },
+  "environment": {
+    "python": "3.13.5",
+    "pyerfa": "2.0.1.5",
+    "numpy": "2.3.5"
+  },
+  "checked_at_utc": "2026-10-25T15:20:53.112222+00:00"
+}
